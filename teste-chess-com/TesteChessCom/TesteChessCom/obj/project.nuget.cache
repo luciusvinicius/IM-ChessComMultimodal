@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "fNr3uJ+a0njdXoiEKhLD54c/pP/NPFitkHdFZc7cHPvnwNm1Bl86ROk3QhiUSHue/Hoopw0O3PJdiuwxbstZoQ==",
+  "success": true,
+  "projectFilePath": "C:\\Vinicius\\Faculdade\\Mestrado\\IM\\praticas\\projeto\\teste-chess-com\\TesteChessCom\\TesteChessCom\\TesteChessCom.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lucius\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\Lucius\\.nuget\\packages\\netstandard.library\\2.0.0\\netstandard.library.2.0.0.nupkg.sha512",
+    "C:\\Users\\Lucius\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
+    "C:\\Users\\Lucius\\.nuget\\packages\\nunit\\3.13.3\\nunit.3.13.3.nupkg.sha512",
+    "C:\\Users\\Lucius\\.nuget\\packages\\nunit3testadapter\\4.2.1\\nunit3testadapter.4.2.1.nupkg.sha512",
+    "C:\\Users\\Lucius\\.nuget\\packages\\selenium.webdriver\\4.5.1\\selenium.webdriver.4.5.1.nupkg.sha512",
+    "C:\\Users\\Lucius\\.nuget\\packages\\selenium.webdriver.geckodriver\\0.32.0\\selenium.webdriver.geckodriver.0.32.0.nupkg.sha512"
+  ],
+  "logs": []
+}
