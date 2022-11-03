@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using OpenQA.Selenium.Interactions;
 using System.Collections;
 using OpenQA.Selenium.Support.UI;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FirstProgram
 {
@@ -20,6 +21,8 @@ namespace FirstProgram
         static string BOARD = "//*[@id=\"board-vs-personalities\"]";
         static string CLOSE_AD = "/html/body/div[24]/div[2]/div/div/button";
         static string COORDS = "/html/body/div[2]/div[2]/chess-board/svg[1]";
+        static string MOVE_TABLE = "/html/body/div[3]/div/vertical-move-list";
+        static int WAIT_TIME = 1000;
         static void Main()
         {
             Console.WriteLine("Guru99");
@@ -46,27 +49,48 @@ namespace FirstProgram
             var coord = (IWebElement)coords[0];
             driver.ExecuteScript("arguments[0].style='display: none;'", coord);
 
-            var list = FindChildrenByClass(board, "piece w");
+            string playerColor = getPlayerColor(board);
+            string pieceColor = "piece " + playerColor[0];
 
-            IWebElement piece = (IWebElement) list[0];
+
+            while (true) {
+                play(driver, board, playerColor, pieceColor);
+                Console.WriteLine("pos play");
+            }
+            
+        }
+
+        static void play(WebDriver driver, IWebElement board, string playerColor, string pieceColor) { 
+            var pieces = FindChildrenByClass(board, pieceColor);
+
+            IWebElement piece = (IWebElement)pieces[0];
             piece.Click();
-
-            Console.WriteLine("Beggining of wait");
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-            Console.WriteLine("End of wait");
 
 
             var possiblePositions = FindChildrenByClass(board, "hint");
 
-
-            //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-
             Actions action = new Actions(driver);
-            IWebElement position1 = (IWebElement) possiblePositions[0];
+            IWebElement position1 = (IWebElement)possiblePositions[0];
             action.MoveToElement(position1).Click().Perform();
 
-            Console.WriteLine("End of sus");
 
+            IWebElement table = driver.FindElement(By.XPath(MOVE_TABLE));
+
+            ArrayList moves = FindChildrenByClass(table, "move");
+
+            bool isCurrent = false;
+
+            do
+            {
+                isCurrent = isCurrentPlayer((IWebElement)moves[moves.Count - 1], playerColor);
+
+
+                Console.WriteLine(isCurrent);
+
+                System.Threading.Thread.Sleep(WAIT_TIME);
+            } while (!isCurrent);
+
+           
             //driver.Close();
         }
 
@@ -82,13 +106,60 @@ namespace FirstProgram
                     list.Add(child);
                 }
             }
-
+            
             return list;
         }
 
-        // string equal to the best music genre
-        
+        static string getPlayerColor(IWebElement element) {
+            ArrayList blackChildren = FindChildrenByClass(element, "square-88");
+            IWebElement blackChild = (IWebElement)blackChildren[0];
+            Console.WriteLine(blackChild.Location);
 
+            ArrayList whiteChildren = FindChildrenByClass(element, "square-11");
+            IWebElement whiteChild = (IWebElement)whiteChildren[0];
+            Console.WriteLine(whiteChild.Location);
+
+            return whiteChild.Location.X - blackChild.Location.X <= 0 ? "white" : "black";
+        }
+
+        static bool isCurrentPlayer(IWebElement element, string playerColor) {
+            Console.WriteLine(element);
+            Console.WriteLine(playerColor);
+            var children = element.FindElements(By.XPath(".//*"));
+            int counter = children.Count;
+            //foreach (IWebElement child in children) { 
+            //string className = child.GetAttribute("class");
+            //    if (className != null && className.Contains(playerColor))
+            //    {
+            //        return false;
+            //    }
+
+            //}
+            return (counter == 2 && playerColor.Contains("white")) || (counter == 1 && playerColor.Contains("black"));
+        }
+        
+        //static void wait(int milliseconds)
+        //{
+        //    var timer1 = new System.Windows.Forms.Timer();
+        //    if (milliseconds == 0 || milliseconds < 0) return;
+
+        //    // Console.WriteLine("start wait timer");
+        //    timer1.Interval = milliseconds;
+        //    timer1.Enabled = true;
+        //    timer1.Start();
+
+        //    timer1.Tick += (s, e) =>
+        //    {
+        //        timer1.Enabled = false;
+        //        timer1.Stop();
+        //        // Console.WriteLine("stop wait timer");
+        //    };
+
+        //    while (timer1.Enabled)
+        //    {
+        //        Application.DoEvents();
+        //    }
+        //}
 
 
 
