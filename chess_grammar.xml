@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<grammar xml:lang="pt-PT" version="1.0" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
+	<rule id="topLevel" scope="public">
+		<one-of>
+		<item> <ruleref uri="#PlayPiece"/> <tag> out.Piece=rules.PlayPiece </tag> </item>
+		<item> <ruleref uri="#MovePiece"/> <tag> out.Board=rules.MovePiece </tag> </item>
+		</one-of>
+	</rule>
+
+	<rule id="PlayPiece" scope="public">
+        <example> Por favor, move o peão de d2 para d3 </example>
+		<example> Mover cavalo em frente ??? </example>
+		<item repeat="0-1"> Por favor </item>
+		<ruleref uri="#Action"/>
+			<tag> out.Action = rules.Action; </tag>
+		<ruleref uri="#Piece"/>
+		<tag> out.MovingPiece = rules.Entity; </tag>
+		</item>
+		<item repeat="0-1"> de </item>
+		<ruleref uri="#Position"/>
+		<tag> out.PositionInitial = rules.Position; </tag>
+		</item>
+		<item repeat="0-1">  
+			<one-of>
+				<item> para </item>
+				<item> em  </item> 
+			</one-of>
+			<ruleref uri="#Position"/>
+			<tag> out.PositionFinal = rules.Position; </tag>
+		</item>
+		<item repeat="0-1"> por favor </item>
+	</rule>
+	
+	<rule id="Piece">
+		<example> cavalo </example>
+		<example> bispo </example>
+		<example> peão </example>
+		<one-of>
+			<item>
+				<ruleref uri="#Entity">
+				<tag> out.Entity=rules.Entity; </tag>
+			</item>
+	</rule>
+
+	<rule id="Positon">
+		<example> b3 </example>
+		<example> a2 </example>
+		<one-of>
+			<item>
+				<ruleref uri="#Horizontal">
+				<tag> out.Horizontal=rules.horizontal_board; </tag>
+				<ruleref uri="#Vertical">
+				<tag> out.Vertical=rules.vertical_board; </tag>
+			</item>
+	</rule>
+
+	<rule id="Entity">
+			<item>rei<tag>out.entity="KING"</tag></item>
+			<item>rainha<tag>out.entity="QUEEN"</tag></item>
+			<item>torre<tag>out.entity="ROOK"</tag></item>
+			<item>bispo<tag>out.entity="BISHOP"</tag></item>
+			<item>cavalo<tag>out.entity="KNIGHT"</tag></item>
+			<item>peão<tag>out.entity="PAWN"</tag></item>
+		</one-of>
+	</rule>
+	<rule id="Action">
+	  <one-of>
+		<item>mover<tag>out.command="MOVE"</tag></item>
+        <item>recuar<tag>out.command="BACKOFF"</tag></item>
+	  </one-of>
+	</rule>
+	
+	
+       
+    <rule id="horizontal_board">
+	  <one-of>
+		<item>a<tag>out.entity="A"</tag></item>
+		<item>b<tag>out.entity="B"</tag></item>
+		<item>c<tag>out.entity="C"</tag></item>
+		<item>d<tag>out.entity="D"</tag></item>
+		<item>e<tag>out.entity="E"</tag></item>
+		<item>f<tag>out.entity="F"</tag></item>
+		<item>g<tag>out.entity="G"</tag></item>
+		<item>h<tag>out.entity="H"</tag></item>
+	  </one-of>
+	</rule>
+    <rule id="vertical_board">
+	  <one-of>
+		<item>1<tag>out.entity="1"</tag></item>
+		<item>2<tag>out.entity="2"</tag></item>
+		<item>3<tag>out.entity="3"</tag></item>
+		<item>4<tag>out.entity="4"</tag></item>
+		<item>5<tag>out.entity="5"</tag></item>
+		<item>6<tag>out.entity="6"</tag></item>
+		<item>7<tag>out.entity="7"</tag></item>
+		<item>8<tag>out.entity="8"</tag></item>
+	  </one-of>
+	</rule>
+	<rule id="directions">
+	  <one-of>
+		<item>direita<tag>out.entity="RIGHT"</tag></item>
+        <item>esquerda<tag>out.entity="LEFT"</tag></item>
+		<item>frente<tag>out.entity="UP"</tag></item>
+		<item>atrás<tag>out.entity="BACK"</tag></item>
+	  </one-of>
+	</rule>
+
+</grammar>
