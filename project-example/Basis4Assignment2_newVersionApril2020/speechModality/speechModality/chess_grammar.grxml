@@ -1,21 +1,122 @@
 ﻿<?xml version="1.0"?>
 <grammar xml:lang="pt-PT" version="1.0" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
 	<rule id="rootRule" scope="public">
+    <one-of>
+      
 		<item>
 			<!--<item>
 				<ruleref uri="#object"/>
 				<tag>out.shape=rules.latest();</tag>
 			</item>-->
+      <item>
+        <ruleref uri="#Start"/>
+        <tag> out = rules.latest() </tag>
+      </item>
 			<item>
 				<ruleref uri="#PlayPiece"/>
 				<tag> out = rules.latest() </tag>
 			</item>
+      <item>
+        <ruleref uri="#ControlBot"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#PlayWith"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#End"/>
+        <tag> out = rules.latest() </tag>
+      </item>
 			<!--<item>
 				<ruleref uri="#color"/>
 				<tag>out.color=rules.latest();</tag>
 			</item>-->
 		</item>
+    </one-of>
 	</rule>
+
+  <rule id="Start">
+      <example> Começar a jogar </example>
+      <example> Por favor, começa o jogo </example>
+      <example> Inicia um novo jogo </example>
+      <example> Quero começar a jogar </example>
+      <example> Gostava de começar a jogar </example>
+    <one-of>
+      <item repeat="0-1">Começar </item>
+      <item repeat="0-1">Inicia</item>
+      <item repeat="0-1">Começa</item>
+      <item repeat="0-1">Quero</item>
+      <item repeat="0-1">Gostava de</item>
+      <item repeat="0-1">Por favor</item>
+    </one-of>
+    <one-of>
+        <item> começar</item>
+        <item> iniciar</item>
+        <item> começa</item>
+        <item> inicia</item>
+      </one-of>
+    <one-of>
+      <item repeat="0-1"> jogo </item>
+      <item repeat="0-1"> novo jogo </item>
+      <item repeat="0-1"> jogar</item>
+    </one-of>
+    </rule>
+
+  
+    <rule id="End">
+      <example> Quero acabar o jogo </example>
+      <example> Gostava de desistir </example>
+      <example> Acaba com este jogo </example>
+      <example> Pretendo sair do jogo </example>
+
+      <one-of>
+				<item repeat="0-1">Quero </item>
+				<item repeat="0-1">Gostava de</item>
+				<item repeat="0-1">Pretendo</item>
+      </one-of>
+      <one-of>
+        <item> acabar</item>
+        <item> desistir</item>
+        <item> termina</item>
+        <item> acaba</item>
+        <item> sair</item>
+      </one-of>
+
+      <item repeat="0-1"> jogo </item>
+    </rule>
+
+
+  <rule id="PlayWith">
+    <example>Quero jogar contra o computador </example>
+    <example>Pretendo jogar contra o meu 2º amigo </example>
+
+    <one-of>
+      <item repeat="0-1">Começa</item>
+      <item repeat="0-1">Quero</item>
+      <item repeat="0-1">Gostava de</item>
+      <item repeat="0-1">Por favor</item>
+    </one-of>
+
+    <one-of>
+      <item repeat="0-1"> jogo </item>
+      <item repeat="0-1"> novo jogo </item>
+      <item repeat="0-1"> jogar</item>
+    </one-of>
+    <item> contra </item>
+    <one-of>
+      <item>
+      computador<tag>out="COMPUTER"</tag>
+      </item>
+      <item>
+      meu amigo<tag>out="FRIEND"</tag>
+      </item>
+      
+    </one-of>
+
+  </rule>
+
+  
 	<rule id="object">
 		<one-of>
 			<item>
@@ -30,6 +131,7 @@
 		</one-of>
 	</rule>
 	
+  
 	<rule id="PlayPiece">
 		<item repeat="0-1"> Por favor </item>
 		<ruleref uri="#Action"/>
@@ -49,6 +151,21 @@
 		</item>
 		<item repeat="0-1"> por favor </item>
 	</rule>
+
+
+  <rule id="ControlBot">
+    <item repeat="0-1"> Por favor </item>
+    <one-of>
+			<item>
+				silêncio<tag>out="SILENT"</tag>
+			</item>
+      <item>
+        narrar<tag>out="NARRATE"</tag>
+      </item>
+    </one-of>
+    <item repeat="0-1"> Por favor </item>
+
+  </rule>
 
 	<rule id="Piece">
 		<example> cavalo </example>
@@ -90,6 +207,9 @@
 			<item>
 				mover<tag>out="MOVE"</tag>
 			</item>
+      <item>
+        fazer<tag>out="DO"</tag>
+      </item>
 			<item>
 				recuar<tag>out="BACKOFF"</tag>
 			</item>
