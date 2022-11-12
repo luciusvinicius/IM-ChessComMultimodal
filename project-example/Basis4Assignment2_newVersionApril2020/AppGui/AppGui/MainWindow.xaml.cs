@@ -29,14 +29,25 @@ namespace AppGui
         private LifeCycleEvents lce;
         private MmiCommunication mmic;
 
+        static string USERNAME_FIELD = "username";
+        static string PASSWORD_FIELD = "password";
+        static string LOGIN_BUTTON = "login";
+        static string USERNAME = "projetoIM";
+        static string PASSWORD = "SigaPara20";
+
         static string BOARD = "//*[@id=\"board-vs-personalities\"]";
         static string CLOSE_AD = "/html/body/div[25]/div[2]/div/div/button";
         static string CLOSE_AD2 = "/html/body/div[26]/div[2]/div/div/button";
-
         static string COORDS = "/html/body/div[2]/div[2]/chess-board/svg[1]";
         static string MOVE_TABLE = "/html/body/div[3]/div/vertical-move-list";
-        static int WAIT_TIME = 1000;
+
         
+        static int WAIT_TIME = 1000;
+
+        static string SITE_URL = "https://www.chess.com";
+        static string LOGIN_URL = "https://www.chess.com/login_and_go?returnUrl=" + SITE_URL;
+        static string COMPUTER_URL = "https://www.chess.com/play/computer";
+
 
         private WebDriver driver;
         private IWebElement board;
@@ -52,35 +63,17 @@ namespace AppGui
             FirefoxOptions options = new FirefoxOptions();
             options.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe"); //location where Firefox is installed
             driver = new FirefoxDriver(options);
+            
+            redirect(LOGIN_URL);
+            
+            IWebElement username_field = driver.FindElement(By.Id(USERNAME_FIELD));
+            username_field.SendKeys(USERNAME);
+            IWebElement password_field = driver.FindElement(By.Id(PASSWORD_FIELD));
+            password_field.SendKeys(PASSWORD);
+            IWebElement login_button = driver.FindElement(By.Id(LOGIN_BUTTON));
+            login_button.Click();
 
-            driver.Navigate().GoToUrl("http://www.chess.com/play/computer");
             driver.Manage().Window.Maximize();
-
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
-
-            try
-            {
-                IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
-                Console.WriteLine(ad);
-                ad.Click();
-            }
-            catch (NoSuchElementException e)
-            {
-                IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD2));
-                Console.WriteLine(ad);
-                ad.Click();
-            }
-
-
-            board = driver.FindElement(By.XPath(BOARD));
-
-            // APAGAR AS COORDS
-            //var coords = FindChildrenByClass(board, "coordinates");
-            //var coord = (IWebElement)coords[0];
-            //driver.ExecuteScript("arguments[0].style='display: none;'", coord);
-
-            playerColor = getPlayerColor(board);
-            pieceColor = "piece " + playerColor[0];
 
             mmiC = new MmiCommunication("localhost",8000, "User1", "GUI");
             mmiC.Message += MmiC_Message;
@@ -106,23 +99,26 @@ namespace AppGui
             Console.WriteLine("JSON:");
             Console.WriteLine(json);
 
+            string entity = recognized["Entity"] != null ? (string)recognized["Entity"] : null;
+            
             switch ((string)recognized["Action"])
             {
                 case "MOVE":
                     Console.WriteLine("MOVE");
-                    string pieceName = recognized["MovingPiece"] != null ? (string)recognized["MovingPiece"] : null;
                     string from = recognized["PositionInitial"] != null ? (string)recognized["PositionInitial"] : null;
                     string to = recognized["PositionFinal"] != null ? (string)recognized["PositionFinal"] : null;
                     var possiblePieces = getPossiblePieces(
-                        pieceName: pieceName,
+                        pieceName: entity,
                         from: from
                     );
-                    Console.WriteLine("Possible pieces: " + possiblePieces.Count);
                     if (possiblePieces.Count == 1)
                     {
                         move((IWebElement)possiblePieces[0], to);
                     }
-                    Console.WriteLine("SUSSY MOVE");
+                    break;
+
+                case "PLAY AGAINST":
+                    playAgainst(entity);
                     break;
             }
 
@@ -160,25 +156,47 @@ namespace AppGui
             //    }
             //});
 
-            //  new 16 april 2020
-            mmic.Send(lce.NewContextRequest());
-
-            string json2 = ""; // "{ \"synthesize\": [";
-            json2 += (string)json.recognized[0].ToString()+ " ";
-            json2 += (string)json.recognized[1].ToString() + " DONE." ;
-            //json2 += "] }";
-            /*
-             foreach (var resultSemantic in e.Result.Semantics)
-            {
-                json += "\"" + resultSemantic.Value.Value + "\", ";
-            }
-            json = json.Substring(0, json.Length - 2);
-            json += "] }";
-            */
-            var exNot = lce.ExtensionNotification(0 + "", 0 + "", 1, json2);
-            mmic.Send(exNot);
-            Console.WriteLine("bbbbbbbbbbbbbbbbbbbbbbbbb");
+            sendMessage("Você é suspeito");
+            
         }
+
+        // ------------------------------ PLAY AGAINS PC OR HUMAN
+
+        public void playAgainst(String entity) {
+            if (entity == "COMPUTER") {
+                redirect(COMPUTER_URL, true, true);
+            }
+        }
+
+        public void redirect(String URL, bool hasBoard = false, bool hasAd = false) {
+            driver.Navigate().GoToUrl(URL);
+            
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
+
+            if (hasAd) {
+                try
+                {
+                    IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
+                    Console.WriteLine(ad);
+                    ad.Click();
+                }
+                catch (NoSuchElementException e)
+                {
+                    IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD2));
+                    Console.WriteLine(ad);
+                    ad.Click();
+                }
+            }
+
+            if (hasBoard) {
+                board = driver.FindElement(By.XPath(BOARD));
+
+                playerColor = getPlayerColor(board);
+                pieceColor = "piece " + playerColor[0];
+            }
+        }
+
+        // ------------------------------ MOVEMENT
 
         public void move(IWebElement piece, string to=null) {
             piece.Click();
@@ -249,40 +267,48 @@ namespace AppGui
             Console.WriteLine("Sussy letter: " + (int)letter);
             return (int)letter - 64;
         }
+
+        //public void play()
+        //{
+        //    var pieces = FindChildrenByClass(board, pieceColor);
+
+        //    IWebElement piece = (IWebElement)pieces[0];
+        //    piece.Click();
+
+
+        //    var possiblePositions = FindChildrenByClass(board, "hint");
+
+        //    Actions action = new Actions(driver);
+        //    IWebElement position1 = (IWebElement)possiblePositions[0];
+        //    action.MoveToElement(position1).Click().Perform();
+
+
+        //    //table = driver.FindElement(By.XPath(MOVE_TABLE));
+
+        //    //ArrayList moves = FindChildrenByClass(table, "move");
+
+
+
+
+        //    //do
+        //    //{
+        //    //    isCurrent = isCurrentPlayer((IWebElement)moves[moves.Count - 1], playerColor);
+
+        //    //    Console.WriteLine(isCurrent);
+
+        //    //    System.Threading.Thread.Sleep(WAIT_TIME);
+        //    //} while (!isCurrent);
+
+
+        //    //driver.Close();
+        //}
+
+        // -------------------------------- EXTRAS
         
-        public void play()
-        {
-            var pieces = FindChildrenByClass(board, pieceColor);
-
-            IWebElement piece = (IWebElement)pieces[0];
-            piece.Click();
-
-
-            var possiblePositions = FindChildrenByClass(board, "hint");
-
-            Actions action = new Actions(driver);
-            IWebElement position1 = (IWebElement)possiblePositions[0];
-            action.MoveToElement(position1).Click().Perform();
-
-
-            //table = driver.FindElement(By.XPath(MOVE_TABLE));
-
-            //ArrayList moves = FindChildrenByClass(table, "move");
-            
-            
-
-     
-            //do
-            //{
-            //    isCurrent = isCurrentPlayer((IWebElement)moves[moves.Count - 1], playerColor);
-
-            //    Console.WriteLine(isCurrent);
-
-            //    System.Threading.Thread.Sleep(WAIT_TIME);
-            //} while (!isCurrent);
-
-
-            //driver.Close();
+        public void sendMessage(String message) {
+            mmic.Send(lce.NewContextRequest());
+            var exNot = lce.ExtensionNotification(0 + "", 0 + "", 1, message);
+            mmic.Send(exNot);
         }
 
         static ArrayList FindChildrenByClass(IWebElement element, string className)
