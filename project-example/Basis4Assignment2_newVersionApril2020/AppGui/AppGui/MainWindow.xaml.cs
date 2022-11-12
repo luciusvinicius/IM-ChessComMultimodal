@@ -31,6 +31,8 @@ namespace AppGui
 
         static string BOARD = "//*[@id=\"board-vs-personalities\"]";
         static string CLOSE_AD = "/html/body/div[25]/div[2]/div/div/button";
+        static string CLOSE_AD2 = "/html/body/div[26]/div[2]/div/div/button";
+
         static string COORDS = "/html/body/div[2]/div[2]/chess-board/svg[1]";
         static string MOVE_TABLE = "/html/body/div[3]/div/vertical-move-list";
         static int WAIT_TIME = 1000;
@@ -45,7 +47,7 @@ namespace AppGui
         
         public MainWindow()
         {
-            InitializeComponent();
+            //InitializeComponent();
 
             FirefoxOptions options = new FirefoxOptions();
             options.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe"); //location where Firefox is installed
@@ -54,21 +56,28 @@ namespace AppGui
             driver.Navigate().GoToUrl("http://www.chess.com/play/computer");
             driver.Manage().Window.Maximize();
 
-            Actions builder = new Actions(driver);
-            //builder.MoveToElement(driver.FindElement(By.XPath(PLAY_URL))).Click().Perform();
-            //driver.FindElement(By.XPath(PLAY_URL)).Click();
-
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
 
-            IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
-            Console.WriteLine(ad);
-            ad.Click();
+            try
+            {
+                IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
+                Console.WriteLine(ad);
+                ad.Click();
+            }
+            catch (NoSuchElementException e)
+            {
+                IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD2));
+                Console.WriteLine(ad);
+                ad.Click();
+            }
+
 
             board = driver.FindElement(By.XPath(BOARD));
 
-            var coords = FindChildrenByClass(board, "coordinates");
-            var coord = (IWebElement)coords[0];
-            driver.ExecuteScript("arguments[0].style='display: none;'", coord);
+            // APAGAR AS COORDS
+            //var coords = FindChildrenByClass(board, "coordinates");
+            //var coord = (IWebElement)coords[0];
+            //driver.ExecuteScript("arguments[0].style='display: none;'", coord);
 
             playerColor = getPlayerColor(board);
             pieceColor = "piece " + playerColor[0];
@@ -83,49 +92,73 @@ namespace AppGui
             // MmiCommunication(string IMhost, int portIM, string UserOD, string thisModalityName)
             mmic = new MmiCommunication("localhost", 8000, "User1", "GUI");
 
-            play();
+            //play();
 
         }
 
         private void MmiC_Message(object sender, MmiEventArgs e)
         {
-            Console.WriteLine("Sussy message: " + e.Message);
+            //Console.WriteLine("Sussy message: " + e.Message);
             var doc = XDocument.Parse(e.Message);
             var com = doc.Descendants("command").FirstOrDefault().Value;
             dynamic json = JsonConvert.DeserializeObject(com);
+            dynamic recognized = json.recognized;
+            Console.WriteLine("JSON:");
+            Console.WriteLine(json);
 
-            Shape _s = null;
-            switch ((string)json.recognized[0].ToString())
+            switch ((string)recognized["Action"])
             {
-                case "SQUARE": _s = rectangle;
-                    break;
-                case "CIRCLE": _s = circle;
-                    break;
-                case "TRIANGLE": _s = triangle;
+                case "MOVE":
+                    Console.WriteLine("MOVE");
+                    string pieceName = recognized["MovingPiece"] != null ? (string)recognized["MovingPiece"] : null;
+                    string from = recognized["PositionInitial"] != null ? (string)recognized["PositionInitial"] : null;
+                    string to = recognized["PositionFinal"] != null ? (string)recognized["PositionFinal"] : null;
+                    var possiblePieces = getPossiblePieces(
+                        pieceName: pieceName,
+                        from: from
+                    );
+                    Console.WriteLine("Possible pieces: " + possiblePieces.Count);
+                    if (possiblePieces.Count == 1)
+                    {
+                        move((IWebElement)possiblePieces[0], to);
+                    }
+                    Console.WriteLine("SUSSY MOVE");
                     break;
             }
 
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                Console.WriteLine(json);
-                string color = (string)json.recognized[1].ToString();
-                switch (color)
-                {
-                    case "GREEN":
-                        _s.Fill = Brushes.Green;
-                        table = driver.FindElement(By.XPath(MOVE_TABLE));
-                        if (isCurrentPlayerByTable(table)) {
-                            play();
-                        }
-                        break;
-                    case "BLUE":
-                        _s.Fill = Brushes.Blue;
-                        break;
-                    case "RED":
-                        _s.Fill = Brushes.Red;
-                        break;
-                }
-            });
+            Console.WriteLine("Sus");
+
+            //Shape _s = null;
+            //switch ((string)json.recognized[0].ToString())
+            //{
+            //    case "SQUARE": _s = rectangle;
+            //        break;
+            //    case "CIRCLE": _s = circle;
+            //        break;
+            //    case "TRIANGLE": _s = triangle;
+            //        break;
+            //}
+
+            //App.Current.Dispatcher.Invoke(() =>
+            //{
+            //    string color = (string)json.recognized[1].ToString();
+            //    switch (color)
+            //    {
+            //        case "GREEN":
+            //            _s.Fill = Brushes.Green;
+            //            table = driver.FindElement(By.XPath(MOVE_TABLE));
+            //            if (isCurrentPlayerByTable(table)) {
+            //                play();
+            //            }
+            //            break;
+            //        case "BLUE":
+            //            _s.Fill = Brushes.Blue;
+            //            break;
+            //        case "RED":
+            //            _s.Fill = Brushes.Red;
+            //            break;
+            //    }
+            //});
 
             //  new 16 april 2020
             mmic.Send(lce.NewContextRequest());
@@ -146,8 +179,56 @@ namespace AppGui
             mmic.Send(exNot);
             Console.WriteLine("bbbbbbbbbbbbbbbbbbbbbbbbb");
         }
-        
 
+        public void move(IWebElement piece, string to=null) {
+            piece.Click();
+
+            var possiblePositions = FindChildrenByClass(board, "hint");
+
+            Actions action = new Actions(driver);
+            IWebElement position1 = (IWebElement)possiblePositions[0];
+            action.MoveToElement(position1).Click().Perform();
+        }
+
+        public ArrayList getPossiblePieces(String pieceName = null, String from = null, 
+            String to = null, String direction = null)
+        {
+            /*
+             * @parameter pieceName: name of the piece to move (KNIGHT, KING, etc)
+             * @parameter from: a2, b3, c4, etc
+             * @parameter to: a2, b3, c4, etc. 
+             * This parameter will filter by the possible moves.
+             * If just one piece can move to this position, it will be automatic
+             * @parameter direction: up, down, left, right, etc
+             */
+            Console.WriteLine("Initus");
+            string piece = pieceName == "KNIGHT" ? pieceColor + "n" : pieceColor + pieceName.ToLower()[0];
+            Console.WriteLine("Sussy piece: " + piece);
+            if (from != null)
+            {
+                piece += " square-" + getHorizontalNumber(from[0]) + from[1];
+            }
+
+            Console.WriteLine("FindByClass: " + piece);
+
+            var possiblePieces = FindChildrenByClass(board, piece);
+
+            if (possiblePieces.Count <= 1) {
+                return possiblePieces;
+            }
+
+            
+
+
+            return possiblePieces;
+
+        }
+        
+        public int getHorizontalNumber(char letter) {
+            Console.WriteLine("Sussy letter: " + (int)letter);
+            return (int)letter - 64;
+        }
+        
         public void play()
         {
             var pieces = FindChildrenByClass(board, pieceColor);
