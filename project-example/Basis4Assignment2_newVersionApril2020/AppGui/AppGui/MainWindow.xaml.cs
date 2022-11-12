@@ -182,12 +182,33 @@ namespace AppGui
 
         public void move(IWebElement piece, string to=null) {
             piece.Click();
+            string hint = "hint";
+            //var possiblePositions = FindChildrenByClass(board, "hint");
 
-            var possiblePositions = FindChildrenByClass(board, "hint");
+            //if (possiblePositions.Count == 1) {
+            //    performMove((IWebElement)possiblePositions[0]);
+            //    return;
+            //}
+            
+            if (to != null)
+            {
+                if (to.Length == 2) { 
+                    hint += " square-" + getHorizontalNumber(to[0]) + to[1];
+                }
+            }
 
+            var possiblePositions = FindChildrenByClass(board, hint);
+
+            if (possiblePositions.Count == 1)
+            {
+                performMove((IWebElement)possiblePositions[0]);
+                return;
+            }
+        }
+
+        public void performMove(IWebElement position) {
             Actions action = new Actions(driver);
-            IWebElement position1 = (IWebElement)possiblePositions[0];
-            action.MoveToElement(position1).Click().Perform();
+            action.MoveToElement(position).Click().Perform();
         }
 
         public ArrayList getPossiblePieces(String pieceName = null, String from = null, 

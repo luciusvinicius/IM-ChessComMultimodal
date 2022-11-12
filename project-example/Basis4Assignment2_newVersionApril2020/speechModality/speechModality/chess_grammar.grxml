@@ -2,54 +2,55 @@
 <grammar xml:lang="pt-PT" version="1.0" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
 	<rule id="rootRule" scope="public">
     <one-of>
-      
+		<!--<item>
+			<ruleref uri="#object"/>
+			<tag>out.shape=rules.latest();</tag>
+		</item>-->
 		<item>
-			<!--<item>
-				<ruleref uri="#object"/>
-				<tag>out.shape=rules.latest();</tag>
-			</item>-->
-      <item>
-        <ruleref uri="#Start"/>
-        <tag> out = rules.latest() </tag>
-      </item>
-			<item>
-				<ruleref uri="#PlayPiece"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-      <item>
-        <ruleref uri="#ControlBot"/>
-        <tag> out = rules.latest() </tag>
-      </item>
-      <item>
-        <ruleref uri="#PlayWith"/>
-        <tag> out = rules.latest() </tag>
-      </item>
-      <item>
-        <ruleref uri="#End"/>
-        <tag> out = rules.latest() </tag>
-      </item>
-			<!--<item>
-				<ruleref uri="#color"/>
-				<tag>out.color=rules.latest();</tag>
-			</item>-->
+			<ruleref uri="#Start"/>
+			<tag> out = rules.latest() </tag>
 		</item>
+		<item>
+			<ruleref uri="#PlayPiece"/>
+			<tag> out = rules.latest() </tag>
+		</item>
+		<item>
+			<ruleref uri="#ControlBot"/>
+			<tag> out = rules.latest() </tag>
+		</item>
+		<item>
+			<ruleref uri="#PlayWith"/>
+			<tag> out = rules.latest() </tag>
+		</item>
+		<item>
+			<ruleref uri="#End"/>
+			<tag> out = rules.latest() </tag>
+		</item>
+		<!--<item>
+			<ruleref uri="#color"/>
+			<tag>out.color=rules.latest();</tag>
+		</item>-->
     </one-of>
 	</rule>
 
   <rule id="Start">
-      <example> Começar a jogar </example>
-      <example> Por favor, começa o jogo </example>
-      <example> Inicia um novo jogo </example>
-      <example> Quero começar a jogar </example>
-      <example> Gostava de começar a jogar </example>
-    <one-of>
-      <item repeat="0-1">Começar </item>
-      <item repeat="0-1">Inicia</item>
-      <item repeat="0-1">Começa</item>
-      <item repeat="0-1">Quero</item>
-      <item repeat="0-1">Gostava de</item>
-      <item repeat="0-1">Por favor</item>
-    </one-of>
+	<example> Começar a jogar </example>
+	<example> Por favor, começa o jogo </example>
+	<example> Inicia um novo jogo </example>
+	<example> Quero começar a jogar </example>
+	<example> Gostava de começar a jogar </example>
+	  
+	<item repeat="0-1">
+		<one-of>
+			<item>Começar </item>
+			<item>Inicia</item>
+			<item>Começa</item>
+			<item>Quero</item>
+			<item>Gostava de</item>
+			<item>Por favor</item>
+		</one-of>
+	</item>
+
     <one-of>
         <item> começar</item>
         <item> iniciar</item>
@@ -70,11 +71,15 @@
       <example> Acaba com este jogo </example>
       <example> Pretendo sair do jogo </example>
 
-      <one-of>
-				<item repeat="0-1">Quero </item>
-				<item repeat="0-1">Gostava de</item>
-				<item repeat="0-1">Pretendo</item>
-      </one-of>
+	
+		<item repeat="0-1">
+			<one-of>
+				<item>Quero </item>
+				<item>Gostava de</item>
+				<item>Pretendo</item>
+			</one-of>
+		</item>
+      
       <one-of>
         <item> acabar</item>
         <item> desistir</item>
@@ -207,9 +212,9 @@
 			<item>
 				mover<tag>out="MOVE"</tag>
 			</item>
-      <item>
-        fazer<tag>out="DO"</tag>
-      </item>
+			<item>
+				fazer<tag>out="DO"</tag>
+			</item>
 			<item>
 				recuar<tag>out="BACKOFF"</tag>
 			</item>
