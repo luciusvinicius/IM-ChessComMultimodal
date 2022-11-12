@@ -8,7 +8,7 @@
 			</item>-->
 			<item>
 				<ruleref uri="#PlayPiece"/>
-				<tag> out.Piece=rules.PlayPiece </tag>
+				<tag> out = rules.latest() </tag>
 			</item>
 			<!--<item>
 				<ruleref uri="#color"/>
@@ -33,7 +33,7 @@
 	<rule id="PlayPiece">
 		<item repeat="0-1"> Por favor </item>
 		<ruleref uri="#Action"/>
-		<tag> out.Action = rules.Action; </tag>
+		<tag> out.Action = rules.latest(); </tag>
 		<ruleref uri="#Piece"/>
 		<tag> out.MovingPiece = rules.Entity; </tag>
 		<item repeat="0-1"> de </item>
@@ -88,10 +88,10 @@
 	<rule id="Action">
 		<one-of>
 			<item>
-				mover<tag>out.command="MOVE"</tag>
+				mover<tag>out="MOVE"</tag>
 			</item>
 			<item>
-				recuar<tag>out.command="BACKOFF"</tag>
+				recuar<tag>out="BACKOFF"</tag>
 			</item>
 		</one-of>
 	</rule>
