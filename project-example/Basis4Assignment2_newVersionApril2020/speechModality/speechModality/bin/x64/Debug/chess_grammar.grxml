@@ -35,17 +35,17 @@
 		<ruleref uri="#Action"/>
 		<tag> out.Action = rules.latest(); </tag>
 		<ruleref uri="#Piece"/>
-		<tag> out.MovingPiece = rules.Entity; </tag>
+		<tag> out.MovingPiece = rules.latest(); </tag>
 		<item repeat="0-1"> de </item>
 		<ruleref uri="#Position"/>
-		<tag> out.PositionInitial = rules.Position; </tag>
+		<tag> out.PositionInitial = rules.latest(); </tag>
 		<item repeat="0-1">
 			<one-of>
 				<item> para </item>
 				<item> em  </item>
 			</one-of>
 			<ruleref uri="#Position"/>
-			<tag> out.PositionFinal = rules.Position; </tag>
+			<tag> out.PositionFinal = rules.latest(); </tag>
 		</item>
 		<item repeat="0-1"> por favor </item>
 	</rule>
@@ -57,7 +57,7 @@
 		<one-of>
 			<item>
 				<ruleref uri="#Entity"/>
-				<tag> out.Entity=rules.Entity; </tag>
+				<tag> out=rules.latest(); </tag>
 			</item>
 		</one-of>
 	</rule>
@@ -65,22 +65,22 @@
 	<rule id="Entity">
 		<one-of>
 			<item>
-				rei<tag>out.entity="KING"</tag>
+				rei<tag>out="KING"</tag>
 			</item>
 			<item>
-				rainha<tag>out.entity="QUEEN"</tag>
+				rainha<tag>out="QUEEN"</tag>
 			</item>
 			<item>
-				torre<tag>out.entity="ROOK"</tag>
+				torre<tag>out="ROOK"</tag>
 			</item>
 			<item>
-				bispo<tag>out.entity="BISHOP"</tag>
+				bispo<tag>out="BISHOP"</tag>
 			</item>
 			<item>
-				cavalo<tag>out.entity="KNIGHT"</tag>
+				cavalo<tag>out="KNIGHT"</tag>
 			</item>
 			<item>
-				peão<tag>out.entity="PAWN"</tag>
+				peão<tag>out="PAWN"</tag>
 			</item>
 		</one-of>
 	</rule>
@@ -101,67 +101,67 @@
 		<example> a2 </example>
 		<item>
 			<ruleref uri="#horizontal_board"/>
-			<tag> out.Horizontal=rules.horizontal_board; </tag>
+			<tag> teste=rules.latest(); </tag>
 		</item>
 		<item>
 			<ruleref uri="#vertical_board"/>
-			<tag> out.Vertical=rules.vertical_board; </tag>
+			<tag> out=teste+rules.latest(); </tag>
 		</item>
 	</rule>
 
 	<rule id="horizontal_board">
 		<one-of>
 			<item>
-				a<tag>out.entity="A"</tag>
+				a<tag>out="A"</tag>
 			</item>
 			<item>
-				b<tag>out.entity="B"</tag>
+				b<tag>out="B"</tag>
 			</item>
 			<item>
-				c<tag>out.entity="C"</tag>
+				c<tag>out="C"</tag>
 			</item>
 			<item>
-				d<tag>out.entity="D"</tag>
+				d<tag>out="D"</tag>
 			</item>
 			<item>
-				e<tag>out.entity="E"</tag>
+				e<tag>out="E"</tag>
 			</item>
 			<item>
-				f<tag>out.entity="F"</tag>
+				f<tag>out="F"</tag>
 			</item>
 			<item>
-				g<tag>out.entity="G"</tag>
+				g<tag>out="G"</tag>
 			</item>
 			<item>
-				h<tag>out.entity="H"</tag>
+				h<tag>out="H"</tag>
 			</item>
 		</one-of>
 	</rule>
 	<rule id="vertical_board">
 		<one-of>
 			<item>
-				1<tag>out.entity="1"</tag>
+				1<tag>out="1"</tag>
 			</item>
 			<item>
-				2<tag>out.entity="2"</tag>
+				2<tag>out="2"</tag>
 			</item>
 			<item>
-				3<tag>out.entity="3"</tag>
+				3<tag>out="3"</tag>
 			</item>
 			<item>
-				4<tag>out.entity="4"</tag>
+				4<tag>out="4"</tag>
 			</item>
 			<item>
-				5<tag>out.entity="5"</tag>
+				5<tag>out="5"</tag>
 			</item>
 			<item>
-				6<tag>out.entity="6"</tag>
+				6<tag>out="6"</tag>
 			</item>
 			<item>
-				7<tag>out.entity="7"</tag>
+				7<tag>out="7"</tag>
 			</item>
 			<item>
-				8<tag>out.entity="8"</tag>
+				8<tag>out="8"</tag>
 			</item>
 		</one-of>
 	</rule>
@@ -169,16 +169,16 @@
 	<rule id="directions">
 		<one-of>
 			<item>
-				direita<tag>out.entity="RIGHT"</tag>
+				direita<tag>out="RIGHT"</tag>
 			</item>
 			<item>
-				esquerda<tag>out.entity="LEFT"</tag>
+				esquerda<tag>out="LEFT"</tag>
 			</item>
 			<item>
-				frente<tag>out.entity="UP"</tag>
+				frente<tag>out="UP"</tag>
 			</item>
 			<item>
-				atrás<tag>out.entity="BACK"</tag>
+				atrás<tag>out="BACK"</tag>
 			</item>
 		</one-of>
 	</rule>
