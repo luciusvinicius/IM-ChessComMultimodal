@@ -29,25 +29,36 @@ namespace AppGui
         private LifeCycleEvents lce;
         private MmiCommunication mmic;
 
+        // ------------------------ LOGIN
         static string USERNAME_FIELD = "username";
         static string PASSWORD_FIELD = "password";
         static string LOGIN_BUTTON = "login";
         static string USERNAME = "projetoIM";
         static string PASSWORD = "SigaPara20";
 
+        // ------------------------ XPATHS
         static string BOARD = "//*[@id=\"board-vs-personalities\"]";
         static string CLOSE_AD = "/html/body/div[25]/div[2]/div/div/button";
-        static string CLOSE_AD2 = "/html/body/div[26]/div[2]/div/div/button";
+        static string CLOSE_AD2 = "/html/body/div[27]/div[2]/div/div/button";
+
+
         static string COORDS = "/html/body/div[2]/div[2]/chess-board/svg[1]";
         static string MOVE_TABLE = "/html/body/div[3]/div/vertical-move-list";
+        static string FRIENDS_LIST = "/html/body/div[1]/div[2]/main/div[1]/div[2]/div[2]/div/div[3]";
 
-        
+        // ------------------------ CONSTS
         static int WAIT_TIME = 1000;
 
         static string SITE_URL = "https://www.chess.com";
         static string LOGIN_URL = "https://www.chess.com/login_and_go?returnUrl=" + SITE_URL;
         static string COMPUTER_URL = "https://www.chess.com/play/computer";
+        static string FRIENDS_URL = "https://www.chess.com/friends";
+        static string VS_FRIENDS_URL = "https://www.chess.com/play/online/new?opponent=";
 
+        // ------------------------ PHRASES
+        static string FRIEND_CHOOSE = "Escolha um amigo dentre a lista de amigos";
+
+        static string FRIEND_CHOOSE_COUNT_ERROR = "Amigo não encontrado, por favor, tente novamente";
 
         private WebDriver driver;
         private IWebElement board;
@@ -118,53 +129,80 @@ namespace AppGui
                     break;
 
                 case "PLAY AGAINST":
-                    playAgainst(entity);
+                    Console.WriteLine("PLAY AGAINST");
+                    int friendNumber = recognized["Number"] != null ? (int)recognized["Number"] : -1;
+                    opponentType(entity, friendNumber);
+                    playAgainst(friendNumber);
                     break;
             }
 
-            Console.WriteLine("Sus");
 
-            //Shape _s = null;
-            //switch ((string)json.recognized[0].ToString())
-            //{
-            //    case "SQUARE": _s = rectangle;
-            //        break;
-            //    case "CIRCLE": _s = circle;
-            //        break;
-            //    case "TRIANGLE": _s = triangle;
-            //        break;
-            //}
-
-            //App.Current.Dispatcher.Invoke(() =>
-            //{
-            //    string color = (string)json.recognized[1].ToString();
-            //    switch (color)
-            //    {
-            //        case "GREEN":
-            //            _s.Fill = Brushes.Green;
-            //            table = driver.FindElement(By.XPath(MOVE_TABLE));
-            //            if (isCurrentPlayerByTable(table)) {
-            //                play();
-            //            }
-            //            break;
-            //        case "BLUE":
-            //            _s.Fill = Brushes.Blue;
-            //            break;
-            //        case "RED":
-            //            _s.Fill = Brushes.Red;
-            //            break;
-            //    }
-            //});
-
-            sendMessage("Você é suspeito");
+        }
+        
+        // ------------------------------ PLAY AGAINS PC OR HUMAN
+        
+        public void playAgainst(int friendID) {
+            /*
+             * @param entity: "1", "2", etc...
+             */
+            Console.WriteLine("friendID: " + friendID);
+            if (friendID == -1 || driver.Url != FRIENDS_URL) return;
             
+            IWebElement friendsList = driver.FindElement(By.XPath(FRIENDS_LIST));
+            Console.WriteLine("friendsList: " + friendsList);
+            ArrayList friends;
+
+            try
+            {
+                friends = FindChildrenByClass(friendsList, "friends-list-item");
+            }
+            catch (StaleElementReferenceException e) {
+                System.Threading.Thread.Sleep(WAIT_TIME);
+                friends = FindChildrenByClass(friendsList, "friends-list-item");
+            }
+            
+            Console.WriteLine("friends: " + friends);
+
+            if (friendID > friends.Count) {
+                sendMessage(FRIEND_CHOOSE_COUNT_ERROR);
+                return;
+            }
+
+            var friend = (IWebElement)friends[friendID - 1];
+            Console.WriteLine("friend: " + friend);
+            var teste = FindChildrenByClass(friend, "friends-list-details");
+            Console.WriteLine("teste: " + teste);
+            var friendDetails = (IWebElement)teste[0];
+            Console.WriteLine("friendDetails: " + friendDetails);
+            var friendData = (IWebElement)FindChildrenByClass(friendDetails, "friends-list-user-data")[0];
+            Console.WriteLine("friendData: " + friendData);
+            var friendName = friendData.Text;
+            Console.WriteLine("friendName: " + friendName);
+
+            redirect(VS_FRIENDS_URL + friendName);
+
+            sendMessage("Desafio enviado para " + friendName);
+
+            //var friendActions = (IWebElement)FindChildrenByClass(friend, "friends-list-find-actions")[0];
+            //var memberActionsContainer = (IWebElement)FindChildrenByClass(friendActions, "member-actions-container")[0];
+
+
         }
 
-        // ------------------------------ PLAY AGAINS PC OR HUMAN
-
-        public void playAgainst(String entity) {
+        public void opponentType(String entity, int friendID)
+        {
+            if (entity == null) return;
+            
             if (entity == "COMPUTER") {
-                redirect(COMPUTER_URL, true, true);
+                redirect(COMPUTER_URL, hasBoard: true, hasAd: true);
+            }
+            else if (entity == "FRIEND")
+            {
+                if (driver.Url != FRIENDS_URL)
+                {
+                    redirect(FRIENDS_URL);
+                    if (friendID == -1) sendMessage(FRIEND_CHOOSE);
+                }
             }
         }
 
@@ -172,7 +210,7 @@ namespace AppGui
             driver.Navigate().GoToUrl(URL);
             
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
-
+            System.Threading.Thread.Sleep(WAIT_TIME);
             if (hasAd) {
                 try
                 {
