@@ -139,20 +139,52 @@
   
 	<rule id="PlayPiece">
 		<item repeat="0-1"> Por favor </item>
-		<ruleref uri="#Action"/>
-		<tag> out.Action = rules.latest(); </tag>
-		<ruleref uri="#Piece"/>
-		<tag> out.Entity = rules.latest(); </tag>
-		<item repeat="0-1"> de </item>
-		<ruleref uri="#Position"/>
-		<tag> out.PositionInitial = rules.latest(); </tag>
+		<item repeat="0-1">
+			<ruleref uri="#Action"/>
+			<tag> out.Action = rules.latest(); </tag>
+		</item>
+
+		<item repeat="0-1">
+			<ruleref uri="#Piece"/>
+			<tag> out.Entity = rules.latest(); </tag>
+		</item>
+		<item repeat="0-1">
+			<one-of>
+				<item> na </item>
+				<item> na posição </item>
+				<item> na casa </item>
+				<item> de </item>
+				<item> da </item>
+			</one-of>
+		</item>
+		<item repeat="0-1">
+			<one-of>
+				<item>
+					<ruleref uri="#Position"/>
+					<tag> out.PositionInitial = rules.latest(); </tag>
+				</item>
+				<item>
+					<ruleref uri="#Direction"/>
+					<tag> out.DirectionInitial = rules.latest(); </tag>
+				</item>
+			</one-of>
+			
+		</item>
 		<item repeat="0-1">
 			<one-of>
 				<item> para </item>
 				<item> em  </item>
 			</one-of>
-			<ruleref uri="#Position"/>
-			<tag> out.PositionFinal = rules.latest(); </tag>
+			<one-of>
+				<item>
+					<ruleref uri="#Position"/>
+					<tag> out.PositionFinal = rules.latest(); </tag>
+				</item>
+				<item>
+					<ruleref uri="#Direction"/>
+					<tag> out.DirectionFinal = rules.latest(); </tag>
+				</item>
+			</one-of>
 		</item>
 		<item repeat="0-1"> por favor </item>
 	</rule>
@@ -291,7 +323,7 @@
 		</one-of>
 	</rule>
 
-	<rule id="directions">
+	<rule id="Direction">
 		<one-of>
 			<item>
 				direita<tag>out="RIGHT"</tag>

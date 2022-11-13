@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
@@ -58,6 +59,11 @@ namespace AppGui
         // ------------------------ PHRASES
         static string FRIEND_CHOOSE = "Escolha um amigo dentre a lista de amigos";
 
+        static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
+        static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
+        static string NO_POSSIBLE_MOVES_ERROR = "Não existem movimentos possíveis para essa peça";
+        static string AMBIGUOS_MOVEMENT = "Existe mais de um movimento possível para essa peça, poderia indicar o destino?";
+        static string AMBIGUOS_PIECE = "Existe mais de uma peça com essa descrição, poderia indicar a peça?";
         static string FRIEND_CHOOSE_COUNT_ERROR = "Amigo não encontrado, por favor, tente novamente";
 
         private WebDriver driver;
@@ -66,7 +72,13 @@ namespace AppGui
         private string pieceColor;
         private bool isCurrent;
         private IWebElement table;
-        
+
+        // ------------------------ DICTS
+        public Dictionary<string, string> context = new Dictionary<string, string>();
+        public Dictionary<string, string> pieceDict = new Dictionary<string, string>() {
+            {"p", "PAWN"}, {"k", "KING"}, {"q", "QUEEN"}, {"r", "ROOK"}, {"b", "BISHOP"}, {"n", "KNIGHT"}
+        };
+
         public MainWindow()
         {
             //InitializeComponent();
@@ -111,21 +123,31 @@ namespace AppGui
             Console.WriteLine(json);
 
             string entity = recognized["Entity"] != null ? (string)recognized["Entity"] : null;
-            
-            switch ((string)recognized["Action"])
+            string action = recognized["Action"] != null ? (string)recognized["Action"] : "";
+
+            if (action == "" && context.ContainsKey("action"))
+            {
+                action = context["action"];
+            }
+
+            switch (action)
             {
                 case "MOVE":
                     Console.WriteLine("MOVE");
                     string from = recognized["PositionInitial"] != null ? (string)recognized["PositionInitial"] : null;
                     string to = recognized["PositionFinal"] != null ? (string)recognized["PositionFinal"] : null;
+                    string directionInitial = recognized["DirectionInitial"] != null ? (string)recognized["DirectionInitial"] : null;
+                    string directionFinal = recognized["DirectionFinal"] != null ? (string)recognized["DirectionFinal"] : null;
+
                     var possiblePieces = getPossiblePieces(
                         pieceName: entity,
-                        from: from
+                        from: from,
+                        direction: directionInitial
                     );
-                    if (possiblePieces.Count == 1)
-                    {
-                        move((IWebElement)possiblePieces[0], to);
-                    }
+                    movePieces(
+                        pieces: possiblePieces, 
+                        to: to, 
+                        direction: directionFinal);
                     break;
 
                 case "PLAY AGAINST":
@@ -133,6 +155,10 @@ namespace AppGui
                     int friendNumber = recognized["Number"] != null ? (int)recognized["Number"] : -1;
                     opponentType(entity, friendNumber);
                     playAgainst(friendNumber);
+                    break;
+
+                default:
+                    sendMessage(NO_KNOWN_ACTION_ERROR);
                     break;
             }
 
@@ -145,11 +171,9 @@ namespace AppGui
             /*
              * @param entity: "1", "2", etc...
              */
-            Console.WriteLine("friendID: " + friendID);
             if (friendID == -1 || driver.Url != FRIENDS_URL) return;
             
             IWebElement friendsList = driver.FindElement(By.XPath(FRIENDS_LIST));
-            Console.WriteLine("friendsList: " + friendsList);
             ArrayList friends;
 
             try
@@ -161,7 +185,6 @@ namespace AppGui
                 friends = FindChildrenByClass(friendsList, "friends-list-item");
             }
             
-            Console.WriteLine("friends: " + friends);
 
             if (friendID > friends.Count) {
                 sendMessage(FRIEND_CHOOSE_COUNT_ERROR);
@@ -169,15 +192,10 @@ namespace AppGui
             }
 
             var friend = (IWebElement)friends[friendID - 1];
-            Console.WriteLine("friend: " + friend);
             var teste = FindChildrenByClass(friend, "friends-list-details");
-            Console.WriteLine("teste: " + teste);
             var friendDetails = (IWebElement)teste[0];
-            Console.WriteLine("friendDetails: " + friendDetails);
             var friendData = (IWebElement)FindChildrenByClass(friendDetails, "friends-list-user-data")[0];
-            Console.WriteLine("friendData: " + friendData);
             var friendName = friendData.Text;
-            Console.WriteLine("friendName: " + friendName);
 
             redirect(VS_FRIENDS_URL + friendName);
 
@@ -236,30 +254,76 @@ namespace AppGui
 
         // ------------------------------ MOVEMENT
 
-        public void move(IWebElement piece, string to=null) {
+        public void movePieces(ArrayList pieces, string to = null, string direction = null) {
+            
+            ArrayList correctPieces = new ArrayList();
+            ArrayList possibleMovesList = new ArrayList();
+            
+            foreach (IWebElement piece in pieces)
+            {
+                var possibleMoves = findPossiblePositions(piece, to, direction);
+                if (possibleMoves.Count >= 1) {
+                    correctPieces.Add(piece);
+                    possibleMovesList.Add(possibleMoves);
+                }
+            }
+
+            if (correctPieces.Count == 1)
+            {
+                var piece = (IWebElement)correctPieces[0];
+                string pieceName = Char.ToString(piece.GetAttribute("class")[7]);
+                context["pieceName"] = pieceName;
+                var possibleMoves = (ArrayList)possibleMovesList[0];
+                if (possibleMoves.Count == 1)
+                {
+                    context["from"] = to;
+                    performMove((IWebElement)possibleMoves[0]);
+
+                }
+                else
+                {
+                    context["from"] = getPiecePosition(piece);
+                }
+            }
+            else if (correctPieces.Count > 1)
+            {
+                sendMessage(AMBIGUOS_PIECE);
+            }
+            else
+            {
+                sendMessage(NO_KNOWN_PIECE_ERROR);
+            }
+
+        }
+        public ArrayList findPossiblePositions(IWebElement piece, string to=null, string direction=null) {
             piece.Click();
             string hint = "hint";
-            //var possiblePositions = FindChildrenByClass(board, "hint");
 
-            //if (possiblePositions.Count == 1) {
-            //    performMove((IWebElement)possiblePositions[0]);
-            //    return;
-            //}
-            
+            // Filter by To
             if (to != null)
             {
-                if (to.Length == 2) { 
-                    hint += " square-" + getHorizontalNumber(to[0]) + to[1];
-                }
+                hint += " square-" + getHorizontalNumber(to[0]) + to[1];
             }
 
             var possiblePositions = FindChildrenByClass(board, hint);
 
-            if (possiblePositions.Count == 1)
+            // Filter by Direction
+            if (direction != null && possiblePositions.Count > 1)
             {
-                performMove((IWebElement)possiblePositions[0]);
-                return;
+                var newPossiblePositions = new ArrayList();
+
+                foreach (IWebElement possiblePosition in possiblePositions)
+                {
+                    if (isOnDirection(piece, possiblePosition, direction))
+                    {
+                        newPossiblePositions.Add(possiblePosition);
+                    }
+                }
+
+                return newPossiblePositions;
             }
+
+            return possiblePositions;
         }
 
         public void performMove(IWebElement position) {
@@ -278,15 +342,35 @@ namespace AppGui
              * If just one piece can move to this position, it will be automatic
              * @parameter direction: up, down, left, right, etc
              */
-            Console.WriteLine("Initus");
-            string piece = pieceName == "KNIGHT" ? pieceColor + "n" : pieceColor + pieceName.ToLower()[0];
-            Console.WriteLine("Sussy piece: " + piece);
-            if (from != null)
+
+            from = getCurrentOrUpdate(from, "from");
+            //to = getCurrentOrUpdate(to ,"to");
+            direction = getCurrentOrUpdate(direction ,"direction");
+            pieceName = getCurrentOrUpdate(pieceName ,"pieceName");
+            
+            Console.WriteLine("Dictionary: ");
+            foreach (KeyValuePair<string, string> con in context)
             {
-                piece += " square-" + getHorizontalNumber(from[0]) + from[1];
+                Console.WriteLine(con.Key + ": " + con.Value);
             }
 
-            Console.WriteLine("FindByClass: " + piece);
+            if (pieceName == null && from == null)
+            {
+                sendMessage(NO_KNOWN_PIECE_ERROR);
+                return new ArrayList();
+            }
+
+            string piece;
+
+            if (from == null) { 
+                piece = pieceName == "KNIGHT" ? pieceColor + "n" : pieceColor + pieceName.ToLower()[0];
+
+            }
+
+            else {
+                piece = " square-" + getHorizontalNumber(from[0]) + from[1];
+            }
+
 
             var possiblePieces = FindChildrenByClass(board, piece);
 
@@ -294,17 +378,32 @@ namespace AppGui
                 return possiblePieces;
             }
 
+            // if there are more than one piece, filter by direction
+            if (direction == null) {
+                return possiblePieces;
+            }
             
+            var currentPiece = (IWebElement)possiblePieces[0];
+            var possiblePiecesOnDirection = new ArrayList();
 
-
-            return possiblePieces;
+            foreach (IWebElement child in possiblePieces) {
+                if (isOnSamePositionInADirection(currentPiece, child, direction))
+                {
+                    possiblePiecesOnDirection.Add(child);
+                }
+                else if (isOnDirection(currentPiece, child, direction))
+                {
+                    currentPiece = child;
+                    possiblePiecesOnDirection = new ArrayList() { child };
+                }
+                
+            }
+            
+            return possiblePiecesOnDirection;
 
         }
-        
-        public int getHorizontalNumber(char letter) {
-            Console.WriteLine("Sussy letter: " + (int)letter);
-            return (int)letter - 64;
-        }
+
+
 
         //public void play()
         //{
@@ -342,6 +441,86 @@ namespace AppGui
         //}
 
         // -------------------------------- EXTRAS
+
+        public int getHorizontalNumber(char letter)
+        {
+            return (int)letter - 64;
+        }
+
+        public string getPiecePosition(IWebElement piece) {
+            var pieceClass = piece.GetAttribute("class");
+
+            return pieceClass.Substring(pieceClass.Length - 2);
+        }
+        
+
+        public bool isOnSamePositionInADirection(IWebElement element, IWebElement target, string direction)
+        {
+            var el = element.Location;
+            var t = target.Location;
+
+            switch (direction)
+            {
+                case ("LEFT"):
+                    return t.X == el.X;
+
+                case ("RIGHT"):
+                    return t.X == el.X;
+
+                case ("UP"):
+                    return t.Y == el.Y;
+
+                case ("DOWN"):
+                    return t.Y == el.Y;
+
+                default:
+                    return false;
+            }
+        }
+
+        public bool isOnDirection(IWebElement element, IWebElement target, string direction) {
+
+            var el = element.Location;
+            var t = target.Location;
+
+            switch (direction) {
+                
+                case ("LEFT"):
+                    return t.X < el.X;
+
+                case ("RIGHT"):
+                    return t.X > el.X;
+
+                case ("UP"):
+                    return t.Y < el.Y;
+
+                case ("DOWN"):
+                    return t.Y > el.Y;
+
+                default:
+                    return false;
+            }
+        }
+
+        public string getCurrentOrUpdate(string variable, string key, string defaultVal = null) {
+
+            if (variable == null)
+            {
+                return getFromContext(key, defaultVal);
+            }
+
+            context[key] = variable;
+
+            return variable;
+        }
+
+        public string getFromContext(string key, string defaultVal = null) {
+            if (context.ContainsKey(key)) {
+                return context[key];
+            }
+
+            return defaultVal;
+        }
         
         public void sendMessage(String message) {
             mmic.Send(lce.NewContextRequest());
