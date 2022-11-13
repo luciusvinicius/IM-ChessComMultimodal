@@ -61,6 +61,7 @@ namespace AppGui
 
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
+        static string WRONG_MOVE_ERROR = "Possibilidade de movimento não existente, poderia indicá-lo novamente?";
         static string NO_POSSIBLE_MOVES_ERROR = "Não existem movimentos possíveis para essa peça";
         static string AMBIGUOS_MOVEMENT = "Existe mais de um movimento possível para essa peça, poderia indicar o destino?";
         static string AMBIGUOS_PIECE = "Existe mais de uma peça com essa descrição, poderia indicar a peça?";
@@ -136,18 +137,22 @@ namespace AppGui
                     Console.WriteLine("MOVE");
                     string from = recognized["PositionInitial"] != null ? (string)recognized["PositionInitial"] : null;
                     string to = recognized["PositionFinal"] != null ? (string)recognized["PositionFinal"] : null;
-                    string directionInitial = recognized["DirectionInitial"] != null ? (string)recognized["DirectionInitial"] : null;
-                    string directionFinal = recognized["DirectionFinal"] != null ? (string)recognized["DirectionFinal"] : null;
+                    //string directionInitial = recognized["DirectionInitial"] != null ? (string)recognized["DirectionInitial"] : null;
+                    //string directionFinal = recognized["DirectionFinal"] != null ? (string)recognized["DirectionFinal"] : null;
 
                     var possiblePieces = getPossiblePieces(
                         pieceName: entity,
-                        from: from,
-                        direction: directionInitial
+                        from: from
+                        //direction: directionInitial
                     );
+                    Console.WriteLine("Possible pieces: " + possiblePieces.Count);
+                    var teste = (IWebElement)possiblePieces[0];
+                    Console.WriteLine("teste: " + teste.GetAttribute("class"));
                     movePieces(
                         pieces: possiblePieces, 
-                        to: to, 
-                        direction: directionFinal);
+                        to: to 
+                        //direction: directionFinal
+                    );
                     break;
 
                 case "PLAY AGAINST":
@@ -254,19 +259,21 @@ namespace AppGui
 
         // ------------------------------ MOVEMENT
 
-        public void movePieces(ArrayList pieces, string to = null, string direction = null) {
+        public void movePieces(ArrayList pieces, string to = null) { //, string direction = null) {
             
             ArrayList correctPieces = new ArrayList();
             ArrayList possibleMovesList = new ArrayList();
             
             foreach (IWebElement piece in pieces)
             {
-                var possibleMoves = findPossiblePositions(piece, to, direction);
+                var possibleMoves = findPossiblePositions(piece, to);//, direction);
                 if (possibleMoves.Count >= 1) {
                     correctPieces.Add(piece);
                     possibleMovesList.Add(possibleMoves);
                 }
             }
+
+            Console.WriteLine("Correct pieces: " + correctPieces.Count);
 
             if (correctPieces.Count == 1)
             {
@@ -283,6 +290,7 @@ namespace AppGui
                 else
                 {
                     context["from"] = getPiecePosition(piece);
+                    sendMessage(AMBIGUOS_MOVEMENT);
                 }
             }
             else if (correctPieces.Count > 1)
@@ -295,30 +303,35 @@ namespace AppGui
             }
 
         }
-        public ArrayList findPossiblePositions(IWebElement piece, string to=null, string direction=null) {
+        public ArrayList findPossiblePositions(IWebElement piece, string to=null) { //, string direction=null) {
             piece.Click();
             string hint = "hint";
 
             // Filter by To
-            if (to != null)
+            if (to != null && to.Length <= 2)
             {
                 hint += " square-" + getHorizontalNumber(to[0]) + to[1];
             }
 
             var possiblePositions = FindChildrenByClass(board, hint);
+            Console.WriteLine("to: " + to);
+            Console.WriteLine("Hint: " + hint);
+            Console.WriteLine("Possible positions (inside): " + possiblePositions.Count);
 
             // Filter by Direction
-            if (direction != null && possiblePositions.Count > 1)
+            if (to != null && to.Length >= 2 && possiblePositions.Count > 1)
             {
                 var newPossiblePositions = new ArrayList();
 
                 foreach (IWebElement possiblePosition in possiblePositions)
                 {
-                    if (isOnDirection(piece, possiblePosition, direction))
+                    if (isOnDirection(piece, possiblePosition, to))
                     {
                         newPossiblePositions.Add(possiblePosition);
                     }
                 }
+
+                Console.WriteLine("New possible positions (Inside): " + newPossiblePositions.Count);
 
                 return newPossiblePositions;
             }
@@ -332,7 +345,7 @@ namespace AppGui
         }
 
         public ArrayList getPossiblePieces(String pieceName = null, String from = null, 
-            String to = null, String direction = null)
+            String to = null)//, String direction = null)
         {
             /*
              * @parameter pieceName: name of the piece to move (KNIGHT, KING, etc)
@@ -345,24 +358,24 @@ namespace AppGui
 
             from = getCurrentOrUpdate(from, "from");
             //to = getCurrentOrUpdate(to ,"to");
-            direction = getCurrentOrUpdate(direction ,"direction");
+            //direction = getCurrentOrUpdate(direction ,"direction");
             pieceName = getCurrentOrUpdate(pieceName ,"pieceName");
             
-            Console.WriteLine("Dictionary: ");
-            foreach (KeyValuePair<string, string> con in context)
-            {
-                Console.WriteLine(con.Key + ": " + con.Value);
-            }
+            //Console.WriteLine("Dictionary: ");
+            //foreach (KeyValuePair<string, string> con in context)
+            //{
+            //    Console.WriteLine(con.Key + ": " + con.Value);
+            //}
 
             if (pieceName == null && from == null)
             {
-                sendMessage(NO_KNOWN_PIECE_ERROR);
+                //sendMessage(NO_KNOWN_PIECE_ERROR);
                 return new ArrayList();
             }
 
             string piece;
 
-            if (from == null) { 
+            if (from == null || from.Length > 2) { 
                 piece = pieceName == "KNIGHT" ? pieceColor + "n" : pieceColor + pieceName.ToLower()[0];
 
             }
@@ -379,7 +392,7 @@ namespace AppGui
             }
 
             // if there are more than one piece, filter by direction
-            if (direction == null) {
+            if (from == null || from.Length <= 2) {
                 return possiblePieces;
             }
             
@@ -387,11 +400,11 @@ namespace AppGui
             var possiblePiecesOnDirection = new ArrayList();
 
             foreach (IWebElement child in possiblePieces) {
-                if (isOnSamePositionInADirection(currentPiece, child, direction))
+                if (isOnSamePositionInADirection(currentPiece, child, from))
                 {
                     possiblePiecesOnDirection.Add(child);
                 }
-                else if (isOnDirection(currentPiece, child, direction))
+                else if (isOnDirection(currentPiece, child, from))
                 {
                     currentPiece = child;
                     possiblePiecesOnDirection = new ArrayList() { child };
@@ -436,11 +449,17 @@ namespace AppGui
         //    //    System.Threading.Thread.Sleep(WAIT_TIME);
         //    //} while (!isCurrent);
 
-
+        
         //    //driver.Close();
         //}
 
         // -------------------------------- EXTRAS
+
+        public string getFromRecognized(dynamic recognized, string key, string defaultValue = null)
+        {
+            return recognized[key] != null ? (string)recognized[key] : defaultValue;
+
+        }
 
         public int getHorizontalNumber(char letter)
         {
@@ -467,10 +486,10 @@ namespace AppGui
                 case ("RIGHT"):
                     return t.X == el.X;
 
-                case ("UP"):
+                case ("FRONT"):
                     return t.Y == el.Y;
 
-                case ("DOWN"):
+                case ("BACK"):
                     return t.Y == el.Y;
 
                 default:
@@ -491,10 +510,10 @@ namespace AppGui
                 case ("RIGHT"):
                     return t.X > el.X;
 
-                case ("UP"):
+                case ("FRONT"):
                     return t.Y < el.Y;
 
-                case ("DOWN"):
+                case ("BACK"):
                     return t.Y > el.Y;
 
                 default:

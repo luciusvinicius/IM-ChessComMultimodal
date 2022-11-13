@@ -165,7 +165,7 @@
 				</item>
 				<item>
 					<ruleref uri="#Direction"/>
-					<tag> out.DirectionInitial = rules.latest(); </tag>
+					<tag> out.PositionInitial = rules.latest(); </tag>
 				</item>
 			</one-of>
 			
@@ -182,7 +182,7 @@
 				</item>
 				<item>
 					<ruleref uri="#Direction"/>
-					<tag> out.DirectionFinal = rules.latest(); </tag>
+					<tag> out.PositionFinal = rules.latest(); </tag>
 				</item>
 			</one-of>
 		</item>
@@ -332,7 +332,7 @@
 				esquerda<tag>out="LEFT"</tag>
 			</item>
 			<item>
-				frente<tag>out="UP"</tag>
+				frente<tag>out="FRONT"</tag>
 			</item>
 			<item>
 				atrás<tag>out="BACK"</tag>
