@@ -113,7 +113,7 @@ namespace AppGui
 
         }
 
-        private void MmiC_Message(object sender, MmiEventArgs e)
+        private void MmiC_Message(object sender, MmiEventArgs e) //Message spoken by user, convert to Json
         {
             //Console.WriteLine("Sussy message: " + e.Message);
             var doc = XDocument.Parse(e.Message);
@@ -164,6 +164,13 @@ namespace AppGui
                     int friendNumber = recognized["Number"] != null ? (int)recognized["Number"] : -1;
                     opponentType(entity, friendNumber);
                     playAgainst(friendNumber);
+                    break;
+                case "SPECIAL":
+                    String specialMove = getFromRecognized(recognized, "SpecialMove");
+                    if (specialMove == "ROQUE")
+                    {
+                        perfomRoque();
+                    }
                     break;
 
                 default:
@@ -340,6 +347,7 @@ namespace AppGui
             return possiblePositions;
         }
 
+
         public void performMove(IWebElement position) {
             Actions action = new Actions(driver);
             action.MoveToElement(position).Click().Perform();
@@ -490,6 +498,40 @@ namespace AppGui
             return list;
         }
 
+        public int CalculateDistance(IWebElement p1, IWebElement p2)
+        {
+            int pos1 = Convert.ToInt32(getPiecePosition(p1));
+
+            int pos2 = Convert.ToInt32(getPiecePosition(p2));
+            int res = Math.Abs(pos2 - pos1);
+            Console.WriteLine("calculate", res);
+            return res;
+        }
+        public void perfomRoque()
+        {
+            ArrayList possiblePieces = getPossiblePieces(pieceName: "KING");
+            //rei
+            if (possiblePieces.Count == 1)
+            {
+
+                ArrayList possiblePositions = new ArrayList();
+                ArrayList possibleMovesList = findPossiblePositions((IWebElement)possiblePieces[0]);
+
+                foreach (IWebElement move in possibleMovesList)
+                {
+                    if (CalculateDistance((IWebElement)possiblePieces[0], move) == 20)
+                    {
+                        //Fazer jogada
+                        Console.WriteLine("tou aqui");
+                        performMove(move);
+                    }
+
+                    Console.WriteLine("Possible positions: " + possiblePositions);
+                    //Arraylist dos Web elements, pegar nas classes deles e ver se estão 2 posicoes seguidas
+                }
+            }
+        }
+
 
 
         //public void play()
@@ -523,7 +565,7 @@ namespace AppGui
         //    //    System.Threading.Thread.Sleep(WAIT_TIME);
         //    //} while (!isCurrent);
 
-        
+
         //    //driver.Close();
         //}
 
