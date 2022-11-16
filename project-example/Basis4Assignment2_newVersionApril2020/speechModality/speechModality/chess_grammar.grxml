@@ -28,6 +28,14 @@
 				<ruleref uri="#End"/>
 				<tag> out = rules.latest() </tag>
 			</item>
+      <item>
+        <ruleref uri="#Capture"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#SpecialMoves"/>
+        <tag> out = rules.latest() </tag>
+      </item>
 		</one-of>
 		<item repeat="0-1">
 			por favor
@@ -207,6 +215,11 @@
         <item> Captura </item>
       </one-of>
       <item repeat="0-1">
+        <ruleref uri="#Number"/>
+        <tag>out.Number = rules.latest();</tag>
+      </item>
+
+      <item repeat="0-1">
         <ruleref uri="#Piece"/>
         <tag> out.Entity = rules.latest(); </tag>
       </item>
@@ -232,10 +245,29 @@
         </one-of>
       </item>
     </item>
-   
-    
-    
-    
+  
+  </rule>
+
+  <rule id="SpecialMoves">
+    <item repeat="0-1">
+      <one-of>
+        <item>
+          Fazer
+        </item>
+        <item> 
+          Faz
+        </item>
+      </one-of>
+    </item>
+    <one-of>
+      <item>
+        En passant <tag> out.SpecialMove="EN PASSANT"</tag>
+      </item>
+      <item>
+        Roque <tag> out.SpecialMove="ROQUE"</tag>
+      </item>
+    </one-of>
+    <tag>out.Action="SPECIAL" </tag> 
     
     
   </rule>
