@@ -1,35 +1,37 @@
 ﻿<?xml version="1.0"?>
 <grammar xml:lang="pt-PT" version="1.0" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
 	<rule id="rootRule" scope="public">
-    <one-of>
-		<!--<item>
-			<ruleref uri="#Number"/>
-			<tag> out = rules.latest()</tag>
+		<item repeat="0-1">
+			magnot
 		</item>
-		<item>
-			amigo <tag>out = "AMIGO"</tag>
-		</item>-->
-		<item>
-			<ruleref uri="#Start"/>
-			<tag> out = rules.latest() </tag>
+		<item repeat="0-1">
+			por favor
 		</item>
-		<item>
-			<ruleref uri="#PlayPiece"/>
-			<tag> out = rules.latest() </tag>
+		<one-of>
+			<item>
+				<ruleref uri="#Start"/>
+				<tag> out = rules.latest() </tag>
+			</item>
+			<item>
+				<ruleref uri="#PlayPiece"/>
+				<tag> out = rules.latest() </tag>
+			</item>
+			<item>
+				<ruleref uri="#ControlBot"/>
+				<tag> out = rules.latest() </tag>
+			</item>
+			<item>
+				<ruleref uri="#PlayWith"/>
+				<tag> out = rules.latest() </tag>
+			</item>
+			<item>
+				<ruleref uri="#End"/>
+				<tag> out = rules.latest() </tag>
+			</item>
+		</one-of>
+		<item repeat="0-1">
+			por favor
 		</item>
-		<item>
-			<ruleref uri="#ControlBot"/>
-			<tag> out = rules.latest() </tag>
-		</item>
-		<item>
-			<ruleref uri="#PlayWith"/>
-			<tag> out = rules.latest() </tag>
-		</item>
-		<item>
-			<ruleref uri="#End"/>
-			<tag> out = rules.latest() </tag>
-		</item>
-    </one-of>
 	</rule>
 
   <rule id="Start">
@@ -108,8 +110,11 @@
 			<item repeat="0-1"> jogar</item>
 		</one-of>
 		
-		<item repeat="0-1"> contra </item>
-		<tag>out.Action = "PLAY AGAINST";</tag>
+		<item repeat="0-1"> 
+			contra 
+			<tag>out.Action = "PLAY AGAINST";</tag>
+		</item>
+		
 		
 		<item repeat="0-1">
 			<ruleref uri="#Number"/>
@@ -140,8 +145,15 @@
 	<rule id="PlayPiece">
 		<item repeat="0-1"> Por favor </item>
 		<item repeat="0-1">
-			<ruleref uri="#Action"/>
-			<tag> out.Action = rules.latest(); </tag>
+			<!--<ruleref uri="#Action"/>-->
+			<item>
+				mover<tag>out.Action="MOVE"</tag>
+			</item>
+		</item>
+
+		<item repeat="0-1">
+			<ruleref uri="#Number"/>
+			<tag>out.Number = rules.latest();</tag>
 		</item>
 
 		<item repeat="0-1">
@@ -168,7 +180,6 @@
 					<tag> out.PositionInitial = rules.latest(); </tag>
 				</item>
 			</one-of>
-			
 		</item>
 		<item repeat="0-1">
 			<one-of>
