@@ -28,14 +28,14 @@
 				<ruleref uri="#End"/>
 				<tag> out = rules.latest() </tag>
 			</item>
-      <item>
-        <ruleref uri="#Capture"/>
-        <tag> out = rules.latest() </tag>
-      </item>
-      <item>
-        <ruleref uri="#SpecialMoves"/>
-        <tag> out = rules.latest() </tag>
-      </item>
+		  <item>
+			<ruleref uri="#Capture"/>
+			<tag> out = rules.latest() </tag>
+		  </item>
+		  <item>
+			<ruleref uri="#SpecialMoves"/>
+			<tag> out = rules.latest() </tag>
+		  </item>
 		</one-of>
 		<item repeat="0-1">
 			por favor
@@ -209,11 +209,13 @@
 	</rule>
 
   <rule id="Capture">
-    <item repeat="0-1">
-      <one-of>
-        <item> Capturar </item>
-        <item> Captura </item>
-      </one-of>
+	  <item repeat="0-1">
+		  <one-of>
+			  <item> Capturar </item>
+			  <item> Captura </item>
+		  </one-of>
+		  <tag>out.Action="CAPTURE"</tag>
+	  </item>
       <item repeat="0-1">
         <ruleref uri="#Number"/>
         <tag>out.Number = rules.latest();</tag>
@@ -244,7 +246,6 @@
           </item>
         </one-of>
       </item>
-    </item>
   
   </rule>
 
