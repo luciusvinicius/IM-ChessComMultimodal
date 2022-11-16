@@ -99,7 +99,7 @@ namespace AppGui
 
             driver.Manage().Window.Maximize();
 
-            mmiC = new MmiCommunication("localhost",8000, "User1", "GUI");
+            mmiC = new MmiCommunication("localhost", 8000, "User1", "GUI");
             mmiC.Message += MmiC_Message;
             mmiC.Start();
 
@@ -123,8 +123,9 @@ namespace AppGui
             Console.WriteLine("JSON:");
             Console.WriteLine(json);
 
-            string entity = recognized["Entity"] != null ? (string)recognized["Entity"] : null;
-            string action = recognized["Action"] != null ? (string)recognized["Action"] : "";
+            string entity = getFromRecognized(recognized, "Entity");
+            //string entity = recognized["Entity"] != null ? (string)recognized["Entity"] : null;
+            string action = getFromRecognized(recognized, "Action", "");
 
             if (action == "" && context.ContainsKey("action"))
             {
@@ -135,14 +136,17 @@ namespace AppGui
             {
                 case "MOVE":
                     Console.WriteLine("MOVE");
-                    string from = recognized["PositionInitial"] != null ? (string)recognized["PositionInitial"] : null;
-                    string to = recognized["PositionFinal"] != null ? (string)recognized["PositionFinal"] : null;
+                    string from = getFromRecognized(recognized, "PositionInitial");
+                    string to = getFromRecognized(recognized, "PositionFinal");
+                    int pieceNumber = recognized["Number"] != null ? (int)recognized["Number"] : -1;
+
                     //string directionInitial = recognized["DirectionInitial"] != null ? (string)recognized["DirectionInitial"] : null;
                     //string directionFinal = recognized["DirectionFinal"] != null ? (string)recognized["DirectionFinal"] : null;
 
                     var possiblePieces = getPossiblePieces(
                         pieceName: entity,
-                        from: from
+                        from: from,
+                        number: pieceNumber
                         //direction: directionInitial
                     );
                     Console.WriteLine("Possible pieces: " + possiblePieces.Count);
@@ -179,7 +183,7 @@ namespace AppGui
             if (friendID == -1 || driver.Url != FRIENDS_URL) return;
             
             IWebElement friendsList = driver.FindElement(By.XPath(FRIENDS_LIST));
-            ArrayList friends;
+            List<IWebElement> friends;
 
             try
             {
@@ -259,10 +263,10 @@ namespace AppGui
 
         // ------------------------------ MOVEMENT
 
-        public void movePieces(ArrayList pieces, string to = null) { //, string direction = null) {
-            
-            ArrayList correctPieces = new ArrayList();
-            ArrayList possibleMovesList = new ArrayList();
+        public void movePieces(List<IWebElement> pieces, string to = null) { //, string direction = null) {
+
+            List<IWebElement> correctPieces = new List<IWebElement>();
+            List<List<IWebElement>> possibleMovesList = new List<List<IWebElement>>();
             
             foreach (IWebElement piece in pieces)
             {
@@ -277,10 +281,10 @@ namespace AppGui
 
             if (correctPieces.Count == 1)
             {
-                var piece = (IWebElement)correctPieces[0];
+                var piece = correctPieces[0];
                 string pieceName = Char.ToString(piece.GetAttribute("class")[7]);
                 context["pieceName"] = pieceName;
-                var possibleMoves = (ArrayList)possibleMovesList[0];
+                var possibleMoves = possibleMovesList[0];
                 if (possibleMoves.Count == 1)
                 {
                     context["from"] = to;
@@ -303,7 +307,7 @@ namespace AppGui
             }
 
         }
-        public ArrayList findPossiblePositions(IWebElement piece, string to=null) { //, string direction=null) {
+        public List<IWebElement> findPossiblePositions(IWebElement piece, string to=null) { //, string direction=null) {
             piece.Click();
             string hint = "hint";
 
@@ -314,14 +318,11 @@ namespace AppGui
             }
 
             var possiblePositions = FindChildrenByClass(board, hint);
-            Console.WriteLine("to: " + to);
-            Console.WriteLine("Hint: " + hint);
-            Console.WriteLine("Possible positions (inside): " + possiblePositions.Count);
 
             // Filter by Direction
             if (to != null && to.Length >= 2 && possiblePositions.Count > 1)
             {
-                var newPossiblePositions = new ArrayList();
+                var newPossiblePositions = new List<IWebElement>();
 
                 foreach (IWebElement possiblePosition in possiblePositions)
                 {
@@ -344,8 +345,8 @@ namespace AppGui
             action.MoveToElement(position).Click().Perform();
         }
 
-        public ArrayList getPossiblePieces(String pieceName = null, String from = null, 
-            String to = null)//, String direction = null)
+        public List<IWebElement> getPossiblePieces(String pieceName = null, String from = null, 
+            String to = null, int number=-1)//, String direction = null)
         {
             /*
              * @parameter pieceName: name of the piece to move (KNIGHT, KING, etc)
@@ -357,20 +358,12 @@ namespace AppGui
              */
 
             from = getCurrentOrUpdate(from, "from");
-            //to = getCurrentOrUpdate(to ,"to");
-            //direction = getCurrentOrUpdate(direction ,"direction");
             pieceName = getCurrentOrUpdate(pieceName ,"pieceName");
-            
-            //Console.WriteLine("Dictionary: ");
-            //foreach (KeyValuePair<string, string> con in context)
-            //{
-            //    Console.WriteLine(con.Key + ": " + con.Value);
-            //}
 
+            // No idea what the piece can be
             if (pieceName == null && from == null)
             {
-                //sendMessage(NO_KNOWN_PIECE_ERROR);
-                return new ArrayList();
+                return new List<IWebElement>();
             }
 
             string piece;
@@ -380,6 +373,7 @@ namespace AppGui
 
             }
 
+            // Exact location of piece
             else {
                 piece = " square-" + getHorizontalNumber(from[0]) + from[1];
             }
@@ -387,33 +381,113 @@ namespace AppGui
 
             var possiblePieces = FindChildrenByClass(board, piece);
 
+            foreach (IWebElement child in possiblePieces)
+            {
+                Console.WriteLine(child.GetAttribute("class"));
+            }
+
             if (possiblePieces.Count <= 1) {
                 return possiblePieces;
             }
-
+            
+  
             // if there are more than one piece, filter by direction
-            if (from == null || from.Length <= 2) {
+            if ((from == null || from.Length <= 2) && number == -1) {
                 return possiblePieces;
             }
             
-            var currentPiece = (IWebElement)possiblePieces[0];
-            var possiblePiecesOnDirection = new ArrayList();
+            //var currentPiece = (IWebElement)possiblePieces[0];
+            //var possiblePiecesOnDirection = new List<IWebElement>();
+            
 
-            foreach (IWebElement child in possiblePieces) {
-                if (isOnSamePositionInADirection(currentPiece, child, from))
-                {
-                    possiblePiecesOnDirection.Add(child);
-                }
-                else if (isOnDirection(currentPiece, child, from))
-                {
-                    currentPiece = child;
-                    possiblePiecesOnDirection = new ArrayList() { child };
-                }
+            var possiblePiecesOnDirection = sortByDirection(possiblePieces, from);
+
+
+            int counter = 0;
+            var usedPos = new List<int>();
+            var newPossiblePieces = new List<List<IWebElement>>();
+            
+            foreach (IWebElement child in possiblePiecesOnDirection)
+            {
+                newPossiblePieces[counter].Add(child);
+                if (counter > number) break;
                 
+                if (from == "LEFT" || from == "RIGHT") {
+                    if (!usedPos.Contains(child.Location.X))
+                    {
+                        counter++;
+                    }
+                }
+                else if (from == "FRONT" || from == "BACK")
+                {
+                    if (!usedPos.Contains(child.Location.Y))
+                    {
+                        counter++;
+                    }
+                }
+                Console.WriteLine(child.GetAttribute("class"));
+            }
+
+            return newPossiblePieces[number];
+
+            //foreach (IWebElement child in possiblePieces) {
+            //    if (isOnSamePositionInADirection(currentPiece, child, from))
+            //    {
+            //        possiblePiecesOnDirection.Add(child);
+            //    }
+            //    else if (isOnDirection(currentPiece, child, from))
+            //    {
+            //        currentPiece = child;
+            //        possiblePiecesOnDirection = new List<IWebElement>() { child };
+            //    }
+
+            //}
+
+            //return possiblePiecesOnDirection;
+
+        }
+
+        public List<IWebElement> sortByDirection(List<IWebElement> list, string direction=null)
+        {
+            if (direction == null)
+            {
+                return list;
+            }
+
+            if (direction == "LEFT")
+            {
+                list.OrderBy(o =>
+                {
+
+                    return o.Location.X;
+                });
+            }
+
+            else if (direction == "RIGHT") {
+                list.OrderByDescending(o =>
+                {
+                    return -o.Location.X;
+                });
+            }
+
+            else if (direction == "FRONT")
+            {
+                list.OrderBy(o =>
+                {
+                    return o.Location.Y;
+                });
+            }
+
+            else if (direction == "BACK")
+            {
+                list.OrderByDescending(o =>
+                {
+                    return -o.Location.Y;
+                });
             }
             
-            return possiblePiecesOnDirection;
-
+            
+            return list;
         }
 
 
@@ -477,6 +551,7 @@ namespace AppGui
         {
             var el = element.Location;
             var t = target.Location;
+            
 
             switch (direction)
             {
@@ -547,10 +622,10 @@ namespace AppGui
             mmic.Send(exNot);
         }
 
-        static ArrayList FindChildrenByClass(IWebElement element, string className)
+        static List<IWebElement> FindChildrenByClass(IWebElement element, string className)
         {
             var children = element.FindElements(By.XPath(".//*"));
-            var list = new ArrayList();
+            var list = new List<IWebElement>();
             foreach (IWebElement child in children)
             {
                 string childClass = child.GetAttribute("class");
@@ -565,11 +640,11 @@ namespace AppGui
 
         static string getPlayerColor(IWebElement element)
         {
-            ArrayList blackChildren = FindChildrenByClass(element, "square-88");
+            List<IWebElement> blackChildren = FindChildrenByClass(element, "square-88");
             IWebElement blackChild = (IWebElement)blackChildren[0];
             Console.WriteLine(blackChild.Location);
 
-            ArrayList whiteChildren = FindChildrenByClass(element, "square-11");
+            List<IWebElement> whiteChildren = FindChildrenByClass(element, "square-11");
             IWebElement whiteChild = (IWebElement)whiteChildren[0];
             Console.WriteLine(whiteChild.Location);
 
@@ -588,7 +663,7 @@ namespace AppGui
 
         public bool isCurrentPlayerByTable(IWebElement tab) {
 
-            ArrayList moves = FindChildrenByClass(tab, "move");
+            List<IWebElement> moves = FindChildrenByClass(tab, "move");
             isCurrent = isCurrentPlayer((IWebElement)moves[moves.Count - 1], playerColor);
             Console.WriteLine("isCurrent: " + isCurrent);
             return isCurrent;
