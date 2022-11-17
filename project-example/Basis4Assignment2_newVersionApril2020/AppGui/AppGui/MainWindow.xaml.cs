@@ -368,7 +368,7 @@ namespace AppGui
                 {
                     int counter = newPossiblePieces.Count;
 
-                    if (counter > number) { break; }
+                    if (number > 0 && counter > number) { break; }
 
                     if (to == "LEFT" || to == "RIGHT")
                     {
@@ -401,78 +401,13 @@ namespace AppGui
                     }
                 }
 
-                return newPossiblePieces[number];
+                
+                if (number >= 0) return newPossiblePieces[number];
+                else return newPossiblePieces[newPossiblePieces.Count + ++number];
 
-
-
-
-
-
-
-                //var newPossiblePositions = new List<IWebElement>();
-
-                //foreach (IWebElement possiblePosition in possiblePositions)
-                //{
-                //    if (isOnDirection(piece, possiblePosition, to))
-                //    {
-                //        newPossiblePositions.Add(possiblePosition);
-                //    }
-                //}
-
-                //Console.WriteLine("New possible positions (Inside): " + newPossiblePositions.Count);
-
-                //return newPossiblePositions;
             }
 
             return possiblePositions;
-
-
-
-            //var possiblePiecesOnDirection = sortByDirection(possiblePieces, from);
-
-            //var usedPos = new List<int>();
-            //var newPossiblePieces = new List<List<IWebElement>>();
-            //number--;
-
-            //foreach (IWebElement child in possiblePiecesOnDirection)
-            //{
-            //    int counter = newPossiblePieces.Count;
-
-            //    if (counter > number) { break; }
-
-            //    if (from == "LEFT" || from == "RIGHT")
-            //    {
-
-            //        if (usedPos.Contains(child.Location.X))
-            //        {
-            //            newPossiblePieces[counter - 1].Add(child);
-            //        }
-            //        else
-            //        {
-            //            newPossiblePieces.Add(new List<IWebElement>());
-            //            newPossiblePieces[counter].Add(child);
-            //            usedPos.Add(child.Location.X);
-            //        }
-            //    }
-
-            //    else if (from == "BACK" || from == "FRONT")
-            //    {
-
-            //        if (usedPos.Contains(child.Location.Y))
-            //        {
-            //            newPossiblePieces[counter - 1].Add(child);
-            //        }
-            //        else
-            //        {
-            //            newPossiblePieces.Add(new List<IWebElement>());
-            //            newPossiblePieces[counter].Add(child);
-            //            usedPos.Add(child.Location.Y);
-            //        }
-            //    }
-            //}
-
-            //Console.WriteLine("Pre return");
-            //return newPossiblePieces[number];
 
         }
 
@@ -517,7 +452,7 @@ namespace AppGui
         }
 
         public List<IWebElement> getPossiblePieces(String pieceName = null, String from = null, 
-            String to = null, int number=-1)//, String direction = null)
+            String to = null, int number=1)//, String direction = null)
         {
             /*
              * @parameter pieceName: name of the piece to move (KNIGHT, KING, etc)
@@ -574,7 +509,7 @@ namespace AppGui
             {
                 int counter = newPossiblePieces.Count;
 
-                if (counter > number) { break; }
+                if (number > 0 && counter > number) { break; }
                 
                 if (from == "LEFT" || from == "RIGHT") {
                     
@@ -606,7 +541,8 @@ namespace AppGui
             }
 
             Console.WriteLine("Pre return");
-            return newPossiblePieces[number];
+            if (number >= 0) return newPossiblePieces[number];
+            else return newPossiblePieces[newPossiblePieces.Count + number];
 
         }
 
