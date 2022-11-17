@@ -151,9 +151,7 @@
 	</rule>
   
 	<rule id="PlayPiece">
-		<item repeat="0-1"> Por favor </item>
 		<item repeat="0-1">
-			<!--<ruleref uri="#Action"/>-->
 			<item>
 				mover<tag>out.Action="MOVE"</tag>
 			</item>
@@ -161,7 +159,7 @@
 
 		<item repeat="0-1">
 			<ruleref uri="#Number"/>
-			<tag>out.Number = rules.latest();</tag>
+			<tag>out.NumberInitial = rules.latest();</tag>
 		</item>
 
 		<item repeat="0-1">
@@ -194,6 +192,12 @@
 				<item> para </item>
 				<item> em  </item>
 			</one-of>
+		</item>
+		<item repeat="0-1">
+			<ruleref uri="#Number"/>
+			<tag>out.NumberFinal = rules.latest();</tag>
+		</item>
+		<item repeat="0-1">
 			<one-of>
 				<item>
 					<ruleref uri="#Position"/>
@@ -205,7 +209,6 @@
 				</item>
 			</one-of>
 		</item>
-		<item repeat="0-1"> por favor </item>
 	</rule>
 
   <rule id="Capture">
