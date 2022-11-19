@@ -61,6 +61,7 @@ namespace AppGui
         static string FRIEND_CHOOSE = "Escolha um amigo dentre a lista de amigos";
         static string CONFIRM_CHOICE = "Você deseja";
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
+        static string REPEAT_PHRASE = "Então poderia repetir a frase novamnte?";
 
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
@@ -79,6 +80,7 @@ namespace AppGui
         {
             ["MOVE"] = "mover",
             ["CAPTURE"] = "capturar",
+            ["PLAY AGAINST"] = "jogar contra",
             ["WHITE"] = "branco",
             ["BLACK"] = "preto",
             ["KING"] = "rei",
@@ -92,7 +94,9 @@ namespace AppGui
             ["RIGHT"] = "direita",
             ["LEFT"] = "esquerda",
             ["FRONT"] = "frente",
-            ["BACK"] = "trás"
+            ["BACK"] = "trás",
+            ["FRIEND"] = "amigo",
+            ["COMPUTER"] = "computador"
         };
 
         // ------------------------ VARS
@@ -194,6 +198,8 @@ namespace AppGui
 
             action = getCurrentOrUpdate(action, "action", "");
 
+            bool isConfident = true;
+
             switch (action)
             {
                 case "MOVE":
@@ -202,14 +208,10 @@ namespace AppGui
                     string to = getFromRecognized(dict, "PositionFinal");
                     int pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
 
-                    //string directionInitial = recognized["DirectionInitial"] != null ? (string)recognized["DirectionInitial"] : null;
-                    //string directionFinal = recognized["DirectionFinal"] != null ? (string)recognized["DirectionFinal"] : null;
-
                     var possiblePieces = getPossiblePieces(
                         pieceName: entity,
                         from: from,
                         number: pieceNumber
-                    //direction: directionInitial
                     );
 
                     foreach (var piece in possiblePieces)
@@ -218,7 +220,6 @@ namespace AppGui
                     }
 
                     int finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
-                    bool isConfident = true;
                     if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
                     if (isConfident)
                     {
@@ -236,8 +237,13 @@ namespace AppGui
                     Console.WriteLine("PLAY AGAINST");
 
                     int friendNumber = dict.ContainsKey("Number") ? int.Parse(dict["Number"]) : -1;
-                    opponentType(entity, friendNumber);
-                    playAgainst(friendNumber);
+                    if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
+                    if (isConfident)
+                    {
+                        opponentType(entity, friendNumber);
+                        playAgainst(friendNumber);
+                    }
+
                     break;
 
                 case "SPECIAL":
@@ -249,14 +255,12 @@ namespace AppGui
                     break;
                     
                 case "ANSWER":
-                    Console.WriteLine("ANSWER");
                     if (!context.ContainsKey(WAITING_CONFIRM) || !bool.Parse(context[WAITING_CONFIRM])) return;
-                    Console.WriteLine("SUSPEITO?");
                     bool answer = entity == "YES";
-                    if (answer)
+                    if (answer) performAction(context, true);
+                    else
                     {
-                        Console.WriteLine("YES, perform it bitch");
-                        performAction(context, true);
+                        sendMessage(REPEAT_PHRASE);
                     }
                     break;
 
@@ -296,13 +300,21 @@ namespace AppGui
                 }
 
 
-                if (context["Action"] == "MOVE")
-                {
-                    phrase += getFromSemanticDict(context["Entity"]);
-                    phrase += getFromSemanticDict("FROM") + getPhraseFromContext("NumberInitial", "ª") + getFromSemanticDict(context["PositionInitial"]);
-                    phrase += getFromSemanticDict("TO") + getPhraseFromContext("NumberFinal", "ª") + getFromSemanticDict(context["PositionFinal"]);
+                switch (context["Action"]) {
+
+                    case "MOVE":
+                        phrase += getFromSemanticDict(context["Entity"]);
+                        phrase += getFromSemanticDict("FROM") + getPhraseFromContext("NumberInitial", "ª") + getFromSemanticDict(context["PositionInitial"]);
+                        phrase += getFromSemanticDict("TO") + getPhraseFromContext("NumberFinal", "ª") + getFromSemanticDict(context["PositionFinal"]);
+                        break;
+
+                    case "PLAY AGAINST":
+                        if (context["Entity"] == "FRIEND") phrase += getPhraseFromContext("Number", "º");
+                        phrase += getFromSemanticDict(context["Entity"]);
+                        break;
 
                 }
+
 
                 phrase = phrase.Trim() + "?" + END_CONFIRM_CHOICE;
                 Console.WriteLine("Confident Message: " + phrase);
