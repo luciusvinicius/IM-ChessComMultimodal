@@ -9,6 +9,10 @@
 		</item>
 		<one-of>
 			<item>
+				<ruleref uri="#Answer"/>
+				<tag>out = rules.latest()</tag>
+			</item>
+			<item>
 				<ruleref uri="#Start"/>
 				<tag> out = rules.latest() </tag>
 			</item>
@@ -42,6 +46,18 @@
 		</item>
 	</rule>
 
+	<rule id="Answer">
+		<one-of>
+			<item>
+				Sim <tag>out.Entity = "YES"</tag>
+			</item>
+			<item>
+				Não <tag>out.Entity = "NO"</tag>
+			</item>
+		</one-of>
+		<tag>out.Action = "ANSWER"</tag>
+	</rule>
+	
   <rule id="Start">
 	<example> Começar a jogar </example>
 	<example> Por favor, começa o jogo </example>

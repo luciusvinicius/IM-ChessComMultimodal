@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Documents;
@@ -58,6 +59,8 @@ namespace AppGui
 
         // ------------------------ PHRASES
         static string FRIEND_CHOOSE = "Escolha um amigo dentre a lista de amigos";
+        static string CONFIRM_CHOICE = "Você deseja";
+        static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
 
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
@@ -66,6 +69,33 @@ namespace AppGui
         static string AMBIGUOS_MOVEMENT = "Existe mais de um movimento possível para essa peça, poderia indicar o destino?";
         static string AMBIGUOS_PIECE = "Existe mais de uma peça com essa descrição, poderia indicar a peça?";
         static string FRIEND_CHOOSE_COUNT_ERROR = "Amigo não encontrado, por favor, tente novamente";
+
+        // ------------------------ CONFIRMATIONS
+
+        
+        float CONFIDENCE_BOTTOM_LIMIT = 0.1f;
+        float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.59f;
+        Dictionary<string, string> semanticDict = new Dictionary<string, string>()
+        {
+            ["MOVE"] = "mover",
+            ["CAPTURE"] = "capturar",
+            ["WHITE"] = "branco",
+            ["BLACK"] = "preto",
+            ["KING"] = "rei",
+            ["QUEEN"] = "rainha",
+            ["ROOK"] = "torre",
+            ["BISHOP"] = "bispo",
+            ["KNIGHT"] = "cavalo",
+            ["PAWN"] = "peão",
+            ["TO"] = "para",
+            ["FROM"] = "de",
+            ["RIGHT"] = "direita",
+            ["LEFT"] = "esquerda",
+            ["FRONT"] = "frente",
+            ["BACK"] = "trás"
+        };
+
+        // ------------------------ VARS
 
         private WebDriver driver;
         private IWebElement board;
@@ -79,6 +109,8 @@ namespace AppGui
         public Dictionary<string, string> pieceDict = new Dictionary<string, string>() {
             {"p", "PAWN"}, {"k", "KING"}, {"q", "QUEEN"}, {"r", "ROOK"}, {"b", "BISHOP"}, {"n", "KNIGHT"}
         };
+
+        static string WAITING_CONFIRM = "WAITING_CONFIRM";
 
         public MainWindow()
         {
@@ -132,13 +164,33 @@ namespace AppGui
             var doc = XDocument.Parse(e.Message);
             var com = doc.Descendants("command").FirstOrDefault().Value;
             dynamic json = JsonConvert.DeserializeObject(com);
-            dynamic recognized = json.recognized;
             Console.WriteLine("JSON:");
             Console.WriteLine(json);
+            var temp = json.recognized;
+            Dictionary<string, string> recognized = JsonConvert.DeserializeObject<Dictionary<string, string>>(temp.ToString());
+            Console.WriteLine("Recognized: ");
 
-            string entity = getFromRecognized(recognized, "Entity");
+
+            foreach (KeyValuePair<string, string> kvp in recognized)
+            {
+                //textBox3.Text += ("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+            }
+
+            performAction(recognized);
+
+
+        }
+
+        public void performAction(Dictionary<string, string> dict, bool ignoreConfidence = false)
+        {
+            float confidence = float.Parse(dict["Confidence"], CultureInfo.InvariantCulture);
+
+            Console.WriteLine("Confidence: " + confidence);
+
+            string entity = getFromRecognized(dict, "Entity");
             //string entity = recognized["Entity"] != null ? (string)recognized["Entity"] : null;
-            string action = getFromRecognized(recognized, "Action", "");
+            string action = getFromRecognized(dict, "Action", "");
 
             action = getCurrentOrUpdate(action, "action", "");
 
@@ -146,9 +198,9 @@ namespace AppGui
             {
                 case "MOVE":
                     Console.WriteLine("MOVE");
-                    string from = getFromRecognized(recognized, "PositionInitial");
-                    string to = getFromRecognized(recognized, "PositionFinal");
-                    int pieceNumber = recognized["NumberInitial"] != null ? (int)recognized["NumberInitial"] : 1;
+                    string from = getFromRecognized(dict, "PositionInitial");
+                    string to = getFromRecognized(dict, "PositionFinal");
+                    int pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
 
                     //string directionInitial = recognized["DirectionInitial"] != null ? (string)recognized["DirectionInitial"] : null;
                     //string directionFinal = recognized["DirectionFinal"] != null ? (string)recognized["DirectionFinal"] : null;
@@ -157,37 +209,54 @@ namespace AppGui
                         pieceName: entity,
                         from: from,
                         number: pieceNumber
-                        //direction: directionInitial
+                    //direction: directionInitial
                     );
-                    
-                    Console.WriteLine("Possible pieces amount: " + possiblePieces.Count);
-                    Console.WriteLine("Possible Pieces:");
+
                     foreach (var piece in possiblePieces)
                     {
                         Console.WriteLine(piece.GetAttribute("class"));
                     }
 
-                    int finalNumer = recognized["NumberFinal"] != null ? (int)recognized["NumberFinal"] : 1;
-                    
-                    movePieces(
-                        pieces: possiblePieces, 
-                        to: to,
-                        number: finalNumer
+                    int finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
+                    bool isConfident = true;
+                    if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
+                    if (isConfident)
+                    {
+                        movePieces(
+                            pieces: possiblePieces,
+                            to: to,
+                            number: finalNumer
                         //direction: directionFinal
-                    );
+                        );
+                    }
+
                     break;
 
                 case "PLAY AGAINST":
                     Console.WriteLine("PLAY AGAINST");
-                    int friendNumber = recognized["Number"] != null ? (int)recognized["Number"] : -1;
+
+                    int friendNumber = dict.ContainsKey("Number") ? int.Parse(dict["Number"]) : -1;
                     opponentType(entity, friendNumber);
                     playAgainst(friendNumber);
                     break;
+
                 case "SPECIAL":
-                    String specialMove = getFromRecognized(recognized, "SpecialMove");
+                    String specialMove = getFromRecognized(dict, "SpecialMove");
                     if (specialMove == "ROQUE")
                     {
                         perfomRoque();
+                    }
+                    break;
+                    
+                case "ANSWER":
+                    Console.WriteLine("ANSWER");
+                    if (!context.ContainsKey(WAITING_CONFIRM) || !bool.Parse(context[WAITING_CONFIRM])) return;
+                    Console.WriteLine("SUSPEITO?");
+                    bool answer = entity == "YES";
+                    if (answer)
+                    {
+                        Console.WriteLine("YES, perform it bitch");
+                        performAction(context, true);
                     }
                     break;
 
@@ -195,12 +264,74 @@ namespace AppGui
                     sendMessage(NO_KNOWN_ACTION_ERROR);
                     break;
             }
-
-
         }
-        
+
+        // ------------------------------ Rate confidence
+
+        public bool generateConfidence(float confidence, Dictionary<string,string> recognized)
+        {
+            bool isConfident = true;
+            context[WAITING_CONFIRM] = "false";
+            string phrase = CONFIRM_CHOICE + " " + getFromSemanticDict(recognized["Action"]);
+            
+            if (confidence < CONFIDENCE_BOTTOM_LIMIT)
+            {
+                isConfident = false;
+            }
+            else if (confidence < CONFIDENCE_BOTTOM_UPPER_LIMIT)
+            {
+                isConfident = false;
+                context[WAITING_CONFIRM] = "true";
+                foreach (KeyValuePair<string, string> kvp in recognized)
+                {
+                    string key = kvp.Key;
+                    string value = kvp.Value;
+                    context[key] = value;
+                    
+                }
+
+                foreach (KeyValuePair<string, string> kvp in context)
+                {
+                    Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+                }
+
+
+                if (context["Action"] == "MOVE")
+                {
+                    phrase += getFromSemanticDict(context["Entity"]);
+                    phrase += getFromSemanticDict("FROM") + getPhraseFromContext("NumberInitial", "ª") + getFromSemanticDict(context["PositionInitial"]);
+                    phrase += getFromSemanticDict("TO") + getPhraseFromContext("NumberFinal", "ª") + getFromSemanticDict(context["PositionFinal"]);
+
+                }
+
+                phrase = phrase.Trim() + "?" + END_CONFIRM_CHOICE;
+                Console.WriteLine("Confident Message: " + phrase);
+                //Confident Message: Você deseja MOVE mover peão de esquerda para frente
+                sendMessage(phrase);
+            }
+
+            return isConfident;
+        }
+
+        public string getFromSemanticDict(string key, string defaultOutput = "") {
+            if (semanticDict.ContainsKey(key))
+            {
+                return " " + semanticDict[key];
+            }
+            return defaultOutput;
+        }
+
+        public string getPhraseFromContext(string key, string extra = "") {
+            if (context.ContainsKey(key)) {
+                return " " + context[key] + extra;
+            }
+            return "";
+        }
+
+
+
         // ------------------------------ PLAY AGAINS PC OR HUMAN
-        
+
         public void playAgainst(int friendID) {
             /*
              * @param entity: "1", "2", etc...
@@ -684,9 +815,9 @@ namespace AppGui
 
         // -------------------------------- EXTRAS
 
-        public string getFromRecognized(dynamic recognized, string key, string defaultValue = null)
+        public dynamic getFromRecognized(Dictionary<string, string> recognized, string key, string defaultValue = null)
         {
-            return recognized[key] != null ? (string)recognized[key] : defaultValue;
+            return recognized.ContainsKey(key) ? recognized[key] : defaultValue;
 
         }
 
