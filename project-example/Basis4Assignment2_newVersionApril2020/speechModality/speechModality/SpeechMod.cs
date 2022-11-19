@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using mmisharp;
 using Microsoft.Speech.Recognition;
 using System.Xml.Linq;
+using System.Globalization;
 //using Newtonsoft.Json;
 
 namespace speechModality
@@ -72,7 +73,6 @@ namespace speechModality
             onRecognized(new SpeechEventArg() { Text = e.Result.Text, Confidence = e.Result.Confidence, Final = false });
         }
 
-        //
         private void Sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             onRecognized(new SpeechEventArg() { Text = e.Result.Text, Confidence = e.Result.Confidence, Final = true });
@@ -80,7 +80,43 @@ namespace speechModality
             //SEND
             // IMPORTANT TO KEEP THE FORMAT {"recognized":["SHAPE","COLOR"]}
 
+            sendJson(e);
+
+            //float confidence = e.Result.Confidence;
+            //if (confidence < CONFIDENCE_BOTTOM_LIMIT) return;
+            //else if (confidence < CONFIDENCE_BOTTOM_UPPER_LIMIT)
+            //{
+            //    previousContext = e.Result.Semantics;
+            //    string phrase = "";
+            //    foreach (var resultSemantic in e.Result.Semantics) {
+            //        string semantic = resultSemantic.Value.Value.ToString();
+            //        if (semanticDict.ContainsKey(semantic)) {
+            //            phrase += semanticDict[semantic] + " ";
+            //        }
+            //        else
+            //        {
+            //            phrase += semantic + " ";
+            //        }
+            //    }
+            //    phrase = phrase.Substring(0, phrase.Length - 1);
+            //    phrase += "?";
+            //    System.Diagnostics.Debug.WriteLine("phrase: " + phrase);
+            //    tts.Speak(phrase);
+            //}
+            //else {
+            //    sendJson(e);
+            //}
+            
+            
+
+        }
+        
+        private void sendJson(SpeechRecognizedEventArgs e) {
             string json = "{ \"recognized\": {";
+
+            json += "\"Confidence\" : \"" + e.Result.Confidence.ToString(CultureInfo.InvariantCulture) + "\", ";
+            System.Diagnostics.Debug.WriteLine("Confidence : " + e.Result.Confidence.ToString(CultureInfo.InvariantCulture));
+
             foreach (var resultSemantic in e.Result.Semantics)
             {
                 System.Diagnostics.Debug.WriteLine(resultSemantic.Key + " : " + resultSemantic.Value.Value);
@@ -89,15 +125,7 @@ namespace speechModality
             json = json.Substring(0, json.Length - 2);
             json += "} }";
 
-
-            //string json = "{ \"recognized\": [";
-            //foreach (var resultSemantic in e.Result.Semantics)
-            //{
-            //    System.Diagnostics.Debug.WriteLine(resultSemantic.Key + " : " + resultSemantic.Value.Value);
-            //    json += "\"" + resultSemantic.Value.Value + "\", ";
-            //}
-            //json = json.Substring(0, json.Length - 2);
-            //json += "] }";
+            System.Diagnostics.Debug.WriteLine(json);
 
             var exNot = lce.ExtensionNotification(e.Result.Audio.StartTime + "", e.Result.Audio.StartTime.Add(e.Result.Audio.Duration) + "", e.Result.Confidence, json);
             mmic.Send(exNot);
