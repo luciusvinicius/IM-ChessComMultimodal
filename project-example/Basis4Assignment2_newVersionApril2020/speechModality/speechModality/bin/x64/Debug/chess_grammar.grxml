@@ -14,6 +14,7 @@
 				<item> quero </item>
 				<item> queria </item>
 				<item> pretendo </item>
+				<item> quero </item>
 			</one-of>
 		</item>
 		<one-of>
@@ -25,6 +26,10 @@
 				<ruleref uri="#Start"/>
 				<tag> out = rules.latest() </tag>
 			</item>
+			 <item>
+				<ruleref uri="#GoBack"/>
+				<tag> out = rules.latest() </tag>
+			  </item>
 			<item>
 				<ruleref uri="#PlayPiece"/>
 				<tag> out = rules.latest() </tag>
@@ -108,6 +113,13 @@
 
 		<item repeat="0-1"> jogo </item>
     </rule>
+
+	<rule id="GoBack">
+		<item>
+			voltar atrás
+			<tag>out.Action = "BACK";</tag>
+		</item>
+	</rule>
 
 
 	<rule id="PlayWith">
@@ -239,7 +251,40 @@
 	  </item>
       <item repeat="0-1">
         <ruleref uri="#Number"/>
-        <tag>out.Number = rules.latest();</tag>
+        <tag>out.NumberFinal = rules.latest();</tag>
+      </item>
+
+      <item repeat="0-1">
+        <ruleref uri="#Piece"/>
+        <tag> out.Entity = rules.latest(); </tag>
+      </item>
+      <item repeat="0-1">
+        <one-of>
+          <item> na </item>
+          <item> na posição </item>
+          <item> na casa </item>
+          <item> de </item>
+          <item> da </item>
+        </one-of>
+      </item>
+      <item repeat="0-1">
+        <one-of>
+          <item>
+            <ruleref uri="#Position"/>
+            <tag> out.PositionFinal = rules.latest(); </tag>
+          </item>
+          <item>
+            <ruleref uri="#Direction"/>
+            <tag> out.PositionFinal = rules.latest(); </tag>
+          </item>
+        </one-of>
+      </item>
+    <item>
+      com
+    </item>
+     <item repeat="0-1">
+        <ruleref uri="#Number"/>
+        <tag>out.NumberInitial = rules.latest();</tag>
       </item>
 
       <item repeat="0-1">
@@ -267,7 +312,6 @@
           </item>
         </one-of>
       </item>
-  
   </rule>
 
   <rule id="SpecialMoves">

@@ -74,6 +74,8 @@ namespace AppGui
         static string REPEAT_PHRASE = "Então poderia repetir a frase novamnte?";
         static string GAME_STARTED = "Jogo iniciado! Tenha um bom jogo!";
         static string GAME_ENDED = "Jogo finalizado!";
+        static string FRIEND_WAIT_FOR_REQUEST = "Espere que o seu amigo aceite o pedido para começar a jogar.";
+        static string LETS_PLAY = "Contra quem quer jogar? Computador ou amigos?";
 
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
@@ -171,6 +173,7 @@ namespace AppGui
             // MmiCommunication(string IMhost, int portIM, string UserOD, string thisModalityName)
             mmic = new MmiCommunication("localhost", 8000, "User1", "GUI");
 
+            sendMessage(LETS_PLAY);
             //play();
 
         }
@@ -289,6 +292,40 @@ namespace AppGui
                         sendMessage(REPEAT_PHRASE);
                         context.Clear();
                     }
+                    break;
+                case "CAPTURE":
+                    Console.WriteLine("CAPTURING");
+                    string initialPos = getFromRecognized(dict, "PositionInital");
+                    string finalPos = getFromRecognized(dict, "PositionFinal");
+                    pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
+
+
+                    possiblePieces = getPossiblePieces(
+                        pieceName: entity,
+                        from: initialPos,
+                        number: pieceNumber
+                        );
+
+                    Console.WriteLine("Possible pieces to capture amount: " + possiblePieces.Count);
+
+                    foreach (var piece in possiblePieces)
+                    {
+                        Console.WriteLine(piece.GetAttribute("class"));
+                    }
+
+                    int finalNumber = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
+
+                    movePieces(
+                        pieces: possiblePieces,
+                        to: finalPos,
+                        number: finalNumber
+                    );
+
+
+                    break;
+
+                case "BACK":
+                    driver.Navigate().Back();
                     break;
 
                 default:
@@ -416,7 +453,7 @@ namespace AppGui
 
                 string friendName = driver.Url.Substring(driver.Url.LastIndexOf("=") + 1);
                 Console.WriteLine("Friend name: " + friendName);
-                sendMessage("Desafio enviado para " + friendName);
+                sendMessage("Desafio enviado para " + friendName + ". " + FRIEND_WAIT_FOR_REQUEST);
                 
             }
 
