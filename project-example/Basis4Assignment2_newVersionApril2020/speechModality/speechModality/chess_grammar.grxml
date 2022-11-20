@@ -256,7 +256,7 @@
 
       <item repeat="0-1">
         <ruleref uri="#Piece"/>
-        <tag> out.Entity = rules.latest(); </tag>
+        <tag> out.Target = rules.latest(); </tag>
       </item>
       <item repeat="0-1">
         <one-of>

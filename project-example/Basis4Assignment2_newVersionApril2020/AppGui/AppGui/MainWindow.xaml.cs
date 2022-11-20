@@ -313,12 +313,12 @@ namespace AppGui
                     }
 
                     finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
-                    
-
+                    string target = getFromRecognized(dict, "Target");
                     capture(
                             pieces: possiblePieces,
                             to: finalPos,
-                            number: finalNumer
+                            number: finalNumer,
+                            targetName: target
                         );
 
                     break;
@@ -338,9 +338,7 @@ namespace AppGui
         public List<IWebElement> getPossiblePiecesCapture(String pieceName = null, 
             String from = null, int number = 1)
         {
-            Console.WriteLine("CARALHO PIECENAME:" + pieceName);
-            Console.WriteLine("CARALHO FROM:" + from);
-            Console.WriteLine("CARALHO NUMBER:" + number);
+
             var pieces = getPossiblePieces(pieceName: pieceName, from: from, number: number);
             
 
@@ -360,13 +358,13 @@ namespace AppGui
             return pieces;
         }
 
-        public void capture(List<IWebElement> pieces, string to = null, int number = -1) {
+        public void capture(List<IWebElement> pieces, string to = null, int number = -1, string targetName = "") {
             List<IWebElement> correctPieces = new List<IWebElement>();
             List<List<IWebElement>> possibleMovesList = new List<List<IWebElement>>();
 
             foreach (IWebElement piece in pieces)
             {
-                var possibleMoves = findPossiblePositions(piece, to, number, isCapture: true);
+                var possibleMoves = findPossiblePositions(piece, to, number, target: targetName, isCapture: true);
                 if (possibleMoves.Count >= 1)
                 {
                     correctPieces.Add(piece);
@@ -375,6 +373,10 @@ namespace AppGui
             }
 
             Console.WriteLine("Correct pieces: " + correctPieces.Count);
+            foreach (var piece in correctPieces)
+            {
+                Console.WriteLine(piece.GetAttribute("class"));
+            }
 
             if (correctPieces.Count == 1)
             {
@@ -382,6 +384,11 @@ namespace AppGui
                 string pieceName = Char.ToString(piece.GetAttribute("class")[7]);
                 context["pieceName"] = pieceName;
                 var possibleMoves = possibleMovesList[0];
+                Console.WriteLine("Possible moves: " + possibleMoves.Count);
+                foreach (var possibleMove in possibleMoves) { 
+                    Console.WriteLine(possibleMove.GetAttribute("class"));
+                }
+
                 if (possibleMoves.Count == 1)
                 {
                     context["from"] = to;
@@ -693,6 +700,9 @@ namespace AppGui
             piece.Click();
             string hint = isCapture ? "capture-hint" : "hint";
 
+            string enemyColor = playerColor == "white" ? "piece b" : "piece w";
+            
+
             // Filter by To
             if (to != null && to.Length <= 2)
             {
@@ -702,6 +712,37 @@ namespace AppGui
             var possiblePositions = FindChildrenByClass(board, hint);
 
             if (possiblePositions.Count <= 1) return possiblePositions;
+
+            // Filter by pieceName
+            if (target != "")
+            {
+
+                Console.WriteLine("targeeeet: " + target);
+                string enemyPiece = target == "KNIGHT" ? enemyColor + "n" : enemyColor + target.ToLower()[0];
+                var newPossiblePositions = new List<IWebElement>();
+                var enemyPieces = FindChildrenByClass(board, enemyPiece);
+                
+                foreach (var enPiece in enemyPieces) {
+                    var enemyPos = enPiece.GetAttribute("class").Substring(enPiece.GetAttribute("class").LastIndexOf(" ") + 1);
+                    foreach (var possiblePosition in possiblePositions)
+                    {
+                        string possiblePositionClass = possiblePosition.GetAttribute("class");
+                        if (possiblePositionClass.Contains(enemyPos))
+                        {
+                            newPossiblePositions.Add(possiblePosition);
+                        }
+                    }
+                }
+                
+                
+                possiblePositions = newPossiblePositions;
+                Console.WriteLine("possiblePositions target: " + possiblePositions.Count);
+                foreach (var possiblePosition in possiblePositions)
+                {
+                    Console.WriteLine(possiblePosition.GetAttribute("class"));
+                }
+
+            }
 
             // Filter by Direction
             if (to != null && to.Length >= 2 && possiblePositions.Count > 1)
@@ -716,7 +757,14 @@ namespace AppGui
                     }
                 }
 
-                var possiblePositionsOnDirection = sortByDirection(newPossiblePositions, to, reverse: true);
+                var possiblePositionsOnDirection = sortByDirection(newPossiblePositions, to, reverse: target == "");
+                Console.WriteLine("possiblePositions sorted: " + possiblePositionsOnDirection.Count);
+                foreach (var possiblePosition in possiblePositionsOnDirection)
+                {
+                    Console.WriteLine(possiblePosition.GetAttribute("class"));
+                }
+
+
                 var usedPos = new List<int>();
                 var newPossiblePieces = new List<List<IWebElement>>();
                 number--;
@@ -724,6 +772,7 @@ namespace AppGui
                 foreach (IWebElement child in possiblePositionsOnDirection)
                 {
                     int counter = newPossiblePieces.Count;
+                    Console.WriteLine("counter: " + counter);
 
                     if (number > 0 && counter > number) { break; }
 
@@ -733,11 +782,13 @@ namespace AppGui
                         if (usedPos.Contains(child.Location.X))
                         {
                             newPossiblePieces[counter - 1].Add(child);
+                            Console.WriteLine("newPossiblePieces[counter - 1].Add(child): " + child.GetAttribute("class"));
                         }
                         else
                         {
                             newPossiblePieces.Add(new List<IWebElement>());
                             newPossiblePieces[counter].Add(child);
+                            Console.WriteLine("newPossiblePieces[counter].Add(child): " + child.GetAttribute("class"));
                             usedPos.Add(child.Location.X);
                         }
                     }
@@ -758,7 +809,13 @@ namespace AppGui
                     }
                 }
 
-                
+                Console.WriteLine("newPossiblePieces (inside func): " + newPossiblePieces.Count);
+                foreach (var newPossiblePiece in newPossiblePieces)
+                {
+                    Console.WriteLine("newPossiblePiece: " + newPossiblePiece.Count);
+                }
+
+
                 if (number >= 0) return newPossiblePieces[number];
                 else return newPossiblePieces[newPossiblePieces.Count + ++number];
 
@@ -847,13 +904,18 @@ namespace AppGui
                 return possiblePieces;
             }
             
-  
+
+
             // if there are more than one piece, filter by direction
-            if ((from == null || from.Length <= 2) && number == -1) {
+            if ((from == null || from.Length <= 2) && number == 1) {
                 return possiblePieces;
             }
-            
-            
+
+
+            foreach (var possiblePiece in possiblePieces)
+            {
+                Console.WriteLine(possiblePiece.GetAttribute("class"));
+            }
 
             var possiblePiecesOnDirection = sortByDirection(possiblePieces, from);
 
@@ -910,10 +972,17 @@ namespace AppGui
             
             if (direction == "LEFT" && !reverse || direction == "RIGHT" && reverse)
             {
+                Console.WriteLine("Sussy left");
                 list.Sort((o1, o2) =>
                 {
                     return o1.Location.X - o2.Location.X;
                 });
+                Console.WriteLine("list: " + list.Count);
+                foreach (var l in list)
+                {
+                    Console.WriteLine("l: " + l.GetAttribute("class"));
+                    Console.WriteLine("l: " + l.Location.X);
+                }
             }
 
             else if (direction == "RIGHT" && !reverse || direction == "LEFT" && reverse) {
