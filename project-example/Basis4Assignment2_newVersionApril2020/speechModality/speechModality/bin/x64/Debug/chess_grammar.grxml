@@ -13,6 +13,7 @@
 				<item> gostaria de </item>
 				<item> quero </item>
 				<item> queria </item>
+				<item> pretendo </item>
 			</one-of>
 		</item>
 		<one-of>
@@ -91,29 +92,21 @@
 
   
     <rule id="End">
-      <example> Quero acabar o jogo </example>
-      <example> Gostava de desistir </example>
-      <example> Acaba com este jogo </example>
-      <example> Pretendo sair do jogo </example>
-
-	
-		<item repeat="0-1">
-			<one-of>
-				<item>Quero </item>
-				<item>Gostava de</item>
-				<item>Pretendo</item>
-			</one-of>
-		</item>
+		<example> Quero acabar o jogo </example>
+		<example> Gostava de desistir </example>
+		<example> Acaba com este jogo </example>
+		<example> Pretendo sair do jogo </example>
       
-      <one-of>
-        <item> acabar</item>
-        <item> desistir</item>
-        <item> termina</item>
-        <item> acaba</item>
-        <item> sair</item>
-      </one-of>
+		<one-of>
+			<item> acabar </item>
+			<item> desistir </item>
+			<item> termina </item>
+			<item> acaba </item>
+			<item> sair </item>
+		</one-of>
+		<tag>out.Action = "END"</tag>
 
-      <item repeat="0-1"> jogo </item>
+		<item repeat="0-1"> jogo </item>
     </rule>
 
 

@@ -42,7 +42,9 @@ namespace AppGui
         static string BOARD = "//*[@id=\"board-vs-personalities\"]";
         static string BOARD_FRIEND = "//*[@id=\"board-single\"]";
         static string BOARD_FRIEND2 = "//*[@id=\"board\"]";
-        
+        static string GIVE_UP_BUTTON = "/html/body/div[4]/div/div[2]/div[2]/div[2]/a";
+
+
         static string CLOSE_AD = "/html/body/div[25]/div[2]/div/div/button";
         static string CLOSE_AD2 = "/html/body/div[27]/div[2]/div/div/button";
 
@@ -71,6 +73,7 @@ namespace AppGui
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
         static string REPEAT_PHRASE = "Então poderia repetir a frase novamnte?";
         static string GAME_STARTED = "Jogo iniciado! Tenha um bom jogo!";
+        static string GAME_ENDED = "Jogo finalizado!";
 
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
@@ -90,6 +93,7 @@ namespace AppGui
             ["MOVE"] = "mover",
             ["CAPTURE"] = "capturar",
             ["PLAY AGAINST"] = "jogar contra",
+            ["END"] = "finalizar a partida",
             ["WHITE"] = "branco",
             ["BLACK"] = "preto",
             ["KING"] = "rei",
@@ -105,7 +109,7 @@ namespace AppGui
             ["FRONT"] = "frente",
             ["BACK"] = "trás",
             ["FRIEND"] = "amigo",
-            ["COMPUTER"] = "computador"
+            ["COMPUTER"] = "computador",
         };
 
         // ------------------------ VARS
@@ -173,7 +177,6 @@ namespace AppGui
 
         private void MmiC_Message(object sender, MmiEventArgs e) //Message spoken by user, convert to Json
         {
-            //Console.WriteLine("Sussy message: " + e.Message);
             var doc = XDocument.Parse(e.Message);
             var com = doc.Descendants("command").FirstOrDefault().Value;
             dynamic json = JsonConvert.DeserializeObject(com);
@@ -186,7 +189,6 @@ namespace AppGui
 
             foreach (KeyValuePair<string, string> kvp in recognized)
             {
-                //textBox3.Text += ("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
                 Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
             }
 
@@ -202,7 +204,6 @@ namespace AppGui
             Console.WriteLine("Confidence: " + confidence);
 
             string entity = getFromRecognized(dict, "Entity");
-            //string entity = recognized["Entity"] != null ? (string)recognized["Entity"] : null;
             string action = getFromRecognized(dict, "Action", "");
 
             action = getCurrentOrUpdate(action, "action", "");
@@ -219,6 +220,13 @@ namespace AppGui
 
                 case "END":
                     Console.WriteLine("GIVE UP");
+                    if (!ignoreConfidence) {
+                        isConfident = generateConfidence(confidence, dict, forceConfidence: true);
+                    }
+                    if (isConfident)
+                    {
+                        giveUp();
+                    }
                     break;
                     
                 case "MOVE":
@@ -246,7 +254,6 @@ namespace AppGui
                             pieces: possiblePieces,
                             to: to,
                             number: finalNumer
-                        //direction: directionFinal
                         );
                     }
 
@@ -280,6 +287,7 @@ namespace AppGui
                     else
                     {
                         sendMessage(REPEAT_PHRASE);
+                        context.Clear();
                     }
                     break;
 
@@ -291,17 +299,17 @@ namespace AppGui
 
         // ------------------------------ Rate confidence
 
-        public bool generateConfidence(float confidence, Dictionary<string,string> recognized)
+        public bool generateConfidence(float confidence, Dictionary<string,string> recognized, bool forceConfidence = false)
         {
             bool isConfident = true;
             context[WAITING_CONFIRM] = "false";
             string phrase = CONFIRM_CHOICE + " " + getFromSemanticDict(recognized["Action"]);
-            
+
             if (confidence < CONFIDENCE_BOTTOM_LIMIT)
             {
                 isConfident = false;
             }
-            else if (confidence < CONFIDENCE_BOTTOM_UPPER_LIMIT)
+            else if (confidence < CONFIDENCE_BOTTOM_UPPER_LIMIT || forceConfidence)
             {
                 isConfident = false;
                 context[WAITING_CONFIRM] = "true";
@@ -413,6 +421,17 @@ namespace AppGui
             }
 
 
+        }
+
+        // ------------------------------ GIVE UP
+
+        public void giveUp() {
+            Console.WriteLine("Give Up sussy");
+            IWebElement button = driver.FindElement(By.XPath(GIVE_UP_BUTTON));
+            Console.WriteLine("button: " + button);
+            Console.WriteLine("button class: " + button.GetAttribute("class"));
+            button.Click();
+            sendMessage(GAME_ENDED);
         }
 
 
