@@ -295,32 +295,31 @@ namespace AppGui
                     break;
                 case "CAPTURE":
                     Console.WriteLine("CAPTURING");
-                    string initialPos = getFromRecognized(dict, "PositionInital");
+                    string initialPos = getFromRecognized(dict, "PositionInitial");
                     string finalPos = getFromRecognized(dict, "PositionFinal");
                     pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
 
-
-                    possiblePieces = getPossiblePieces(
+                    possiblePieces = getPossiblePiecesCapture(
                         pieceName: entity,
                         from: initialPos,
                         number: pieceNumber
-                        );
+                    );
 
-                    Console.WriteLine("Possible pieces to capture amount: " + possiblePieces.Count);
-
+                    Console.WriteLine("Possible pieces: " + possiblePieces.Count);
+                    
                     foreach (var piece in possiblePieces)
                     {
                         Console.WriteLine(piece.GetAttribute("class"));
                     }
 
-                    int finalNumber = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
+                    finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
+                    
 
-                    movePieces(
-                        pieces: possiblePieces,
-                        to: finalPos,
-                        number: finalNumber
-                    );
-
+                    capture(
+                            pieces: possiblePieces,
+                            to: finalPos,
+                            number: finalNumer
+                        );
 
                     break;
 
@@ -332,6 +331,85 @@ namespace AppGui
                     sendMessage(NO_KNOWN_ACTION_ERROR);
                     break;
             }
+        }
+
+        // ------------------------------ CAPTURE
+        
+        public List<IWebElement> getPossiblePiecesCapture(String pieceName = null, 
+            String from = null, int number = 1)
+        {
+            Console.WriteLine("CARALHO PIECENAME:" + pieceName);
+            Console.WriteLine("CARALHO FROM:" + from);
+            Console.WriteLine("CARALHO NUMBER:" + number);
+            var pieces = getPossiblePieces(pieceName: pieceName, from: from, number: number);
+            
+
+
+            Console.WriteLine("Possible pieces func: " + pieces.Count);
+
+            foreach (var piece in pieces)
+            {
+                Console.WriteLine(piece.GetAttribute("class"));
+            }
+
+            if (pieces.Count == 0) {
+                // pieces = every player is a possible piece
+                pieces = FindChildrenByClass(board, pieceColor);
+            }
+            
+            return pieces;
+        }
+
+        public void capture(List<IWebElement> pieces, string to = null, int number = -1) {
+            List<IWebElement> correctPieces = new List<IWebElement>();
+            List<List<IWebElement>> possibleMovesList = new List<List<IWebElement>>();
+
+            foreach (IWebElement piece in pieces)
+            {
+                var possibleMoves = findPossiblePositions(piece, to, number, isCapture: true);
+                if (possibleMoves.Count >= 1)
+                {
+                    correctPieces.Add(piece);
+                    possibleMovesList.Add(possibleMoves);
+                }
+            }
+
+            Console.WriteLine("Correct pieces: " + correctPieces.Count);
+
+            if (correctPieces.Count == 1)
+            {
+                var piece = correctPieces[0];
+                string pieceName = Char.ToString(piece.GetAttribute("class")[7]);
+                context["pieceName"] = pieceName;
+                var possibleMoves = possibleMovesList[0];
+                if (possibleMoves.Count == 1)
+                {
+                    context["from"] = to;
+                    performMove((IWebElement)possibleMoves[0]);
+
+                }
+                else
+                {
+                    context["from"] = getPiecePosition(piece);
+                    sendMessage(AMBIGUOS_MOVEMENT);
+                }
+            }
+            else if (correctPieces.Count > 1)
+            {
+                sendMessage(AMBIGUOS_PIECE);
+            }
+            else
+            {
+                sendMessage(NO_KNOWN_PIECE_ERROR);
+            }
+        }
+
+        public List<IWebElement> getTargets(IWebElement piece, 
+            string to = null, int number = -1, string targetName="") { 
+
+
+            
+            return null;
         }
 
         // ------------------------------ Rate confidence
@@ -610,9 +688,10 @@ namespace AppGui
             }
 
         }
-        public List<IWebElement> findPossiblePositions(IWebElement piece, string to=null, int number = -1) { //, string direction=null) {
+        public List<IWebElement> findPossiblePositions(IWebElement piece, string to=null, int number = -1, 
+            string target = "", bool isCapture = false) { //, string direction=null) {
             piece.Click();
-            string hint = "hint";
+            string hint = isCapture ? "capture-hint" : "hint";
 
             // Filter by To
             if (to != null && to.Length <= 2)
@@ -762,7 +841,6 @@ namespace AppGui
                 piece = " square-" + getHorizontalNumber(from[0]) + from[1];
             }
 
-            Console.WriteLine("Before board: " + board);
             var possiblePieces = FindChildrenByClass(board, piece);
 
             if (possiblePieces.Count <= 1) {
@@ -818,7 +896,6 @@ namespace AppGui
                 }
             }
 
-            Console.WriteLine("Pre return");
             if (number >= 0) return newPossiblePieces[number];
             else return newPossiblePieces[newPossiblePieces.Count + number];
 
@@ -897,33 +974,33 @@ namespace AppGui
             }
         }
 
-        public void capture()
-        {
-            //ArrayList possibleCaptures = new ArrayList();
-            List<IWebElement> piecesFromUser = FindChildrenByClass(board, "piece " + playerColor[0]);
-            //{ "capturator":"captures"}
-            Dictionary<IWebElement, List<IWebElement>> possibleCapturesDict = new Dictionary<IWebElement, List<IWebElement>>();
+        //public void capture()
+        //{
+        //    //ArrayList possibleCaptures = new ArrayList();
+        //    List<IWebElement> piecesFromUser = FindChildrenByClass(board, "piece " + playerColor[0]);
+        //    //{ "capturator":"captures"}
+        //    Dictionary<IWebElement, List<IWebElement>> possibleCapturesDict = new Dictionary<IWebElement, List<IWebElement>>();
 
-            foreach (IWebElement piece in piecesFromUser)
-            {
-                var possibleCaptureByEachPiece = findPossibleCaptures(piece);
+        //    foreach (IWebElement piece in piecesFromUser)
+        //    {
+        //        var possibleCaptureByEachPiece = findPossibleCaptures(piece);
 
-                if (possibleCaptureByEachPiece.Count >= 1)
-                {
-                    possibleCapturesDict.Add(piece, possibleCaptureByEachPiece);
-                }
+        //        if (possibleCaptureByEachPiece.Count >= 1)
+        //        {
+        //            possibleCapturesDict.Add(piece, possibleCaptureByEachPiece);
+        //        }
 
-            }
-            // se so tiver uma key é essa q se move
-            if (possibleCapturesDict.Count == 1)
-            {
-                var firstKey = possibleCapturesDict.Keys.FirstOrDefault();
-                if (possibleCapturesDict[firstKey].Count == 1)
-                {
-                    performMove((IWebElement)(possibleCapturesDict[firstKey][0]));
-                }
-            }
-        }
+        //    }
+        //    // se so tiver uma key é essa q se move
+        //    if (possibleCapturesDict.Count == 1)
+        //    {
+        //        var firstKey = possibleCapturesDict.Keys.FirstOrDefault();
+        //        if (possibleCapturesDict[firstKey].Count == 1)
+        //        {
+        //            performMove((IWebElement)(possibleCapturesDict[firstKey][0]));
+        //        }
+        //    }
+        //}
 
         //public void play()
         //{
@@ -1057,7 +1134,6 @@ namespace AppGui
 
         static List<IWebElement> FindChildrenByClass(IWebElement element, string className)
         {
-            Console.WriteLine("sussy element: " + element);
             var children = element.FindElements(By.XPath(".//*"));
             var list = new List<IWebElement>();
             foreach (IWebElement child in children)
