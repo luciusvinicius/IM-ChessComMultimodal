@@ -7,6 +7,14 @@
 		<item repeat="0-1">
 			por favor
 		</item>
+		<item repeat="0-1">
+			<one-of>
+				<item> gostava de </item>
+				<item> gostaria de </item>
+				<item> quero </item>
+				<item> queria </item>
+			</one-of>
+		</item>
 		<one-of>
 			<item>
 				<ruleref uri="#Answer"/>
@@ -65,29 +73,21 @@
 	<example> Quero começar a jogar </example>
 	<example> Gostava de começar a jogar </example>
 	  
-	<item repeat="0-1">
-		<one-of>
-			<item>Começar </item>
-			<item>Inicia</item>
-			<item>Começa</item>
-			<item>Quero</item>
-			<item>Gostava de</item>
-			<item>Por favor</item>
-		</one-of>
-	</item>
-
     <one-of>
         <item> começar</item>
         <item> iniciar</item>
         <item> começa</item>
         <item> inicia</item>
-      </one-of>
+		<item> jogar </item>
+    </one-of>
+	<tag>out.Action = "START"</tag>
+	<tag>out.Entity = "GAME"</tag>
+	  
     <one-of>
       <item repeat="0-1"> jogo </item>
       <item repeat="0-1"> novo jogo </item>
-      <item repeat="0-1"> jogar</item>
     </one-of>
-    </rule>
+ </rule>
 
   
     <rule id="End">

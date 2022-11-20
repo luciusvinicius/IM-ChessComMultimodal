@@ -40,6 +40,9 @@ namespace AppGui
 
         // ------------------------ XPATHS
         static string BOARD = "//*[@id=\"board-vs-personalities\"]";
+        static string BOARD_FRIEND = "//*[@id=\"board-single\"]";
+        static string BOARD_FRIEND2 = "//*[@id=\"board\"]";
+        
         static string CLOSE_AD = "/html/body/div[25]/div[2]/div/div/button";
         static string CLOSE_AD2 = "/html/body/div[27]/div[2]/div/div/button";
 
@@ -47,6 +50,11 @@ namespace AppGui
         static string COORDS = "/html/body/div[2]/div[2]/chess-board/svg[1]";
         static string MOVE_TABLE = "/html/body/div[3]/div/vertical-move-list";
         static string FRIENDS_LIST = "/html/body/div[1]/div[2]/main/div[1]/div[2]/div[2]/div/div[3]";
+
+        static string COMPUTER_START_BUTTON = "/html/body/div[4]/div/div[2]/button";
+        static string FRIEND_START_BUTTON = "/html/body/div[4]/div/div[2]/div/div[2]/div[1]/button";
+        static string FRIEND_AGREE_BUTTON = "/html/body/div[15]/div[2]/div/div/div/div[8]/button";
+
 
         // ------------------------ CONSTS
         static int WAIT_TIME = 1000;
@@ -62,6 +70,7 @@ namespace AppGui
         static string CONFIRM_CHOICE = "Você deseja";
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
         static string REPEAT_PHRASE = "Então poderia repetir a frase novamnte?";
+        static string GAME_STARTED = "Jogo iniciado! Tenha um bom jogo!";
 
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
@@ -202,6 +211,16 @@ namespace AppGui
 
             switch (action)
             {
+                case "START":
+                    Console.WriteLine("START");
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL)) return;
+                    startGame();
+                    break;
+
+                case "END":
+                    Console.WriteLine("GIVE UP");
+                    break;
+                    
                 case "MOVE":
                     Console.WriteLine("MOVE");
                     string from = getFromRecognized(dict, "PositionInitial");
@@ -340,6 +359,62 @@ namespace AppGui
             return "";
         }
 
+        // ------------------------------ START GAME
+
+        public void startGame() {
+            Console.WriteLine("Start Game");
+            IWebElement button;
+            if (driver.Url == COMPUTER_URL)
+            {
+               button = driver.FindElement(By.XPath(COMPUTER_START_BUTTON));
+            
+            }
+            else if (driver.Url.Contains(VS_FRIENDS_URL))
+            {
+                button = driver.FindElement(By.XPath(FRIEND_START_BUTTON));
+            }
+            else
+            {
+                return;
+            }
+
+            Console.WriteLine("Clicking start button");
+            button.Click();
+
+            if (driver.Url == COMPUTER_URL)
+            {
+                System.Threading.Thread.Sleep(WAIT_TIME);
+                button = driver.FindElement(By.XPath(COMPUTER_START_BUTTON));
+                button.Click();
+                sendMessage(GAME_STARTED);
+
+            }
+            else if (driver.Url.Contains(VS_FRIENDS_URL)) {
+                System.Threading.Thread.Sleep(WAIT_TIME);
+                try
+                {
+                    button = driver.FindElement(By.XPath(FRIEND_AGREE_BUTTON));
+                    button.Click();
+
+                    System.Threading.Thread.Sleep(WAIT_TIME);
+                    button = driver.FindElement(By.XPath(FRIEND_START_BUTTON));
+                    button.Click();
+                }
+                catch (NoSuchElementException)
+                {
+                    
+                }
+
+
+                string friendName = driver.Url.Substring(driver.Url.LastIndexOf("=") + 1);
+                Console.WriteLine("Friend name: " + friendName);
+                sendMessage("Desafio enviado para " + friendName);
+                
+            }
+
+
+        }
+
 
 
         // ------------------------------ PLAY AGAINS PC OR HUMAN
@@ -374,9 +449,8 @@ namespace AppGui
             var friendData = (IWebElement)FindChildrenByClass(friendDetails, "friends-list-user-data")[0];
             var friendName = friendData.Text;
 
-            redirect(VS_FRIENDS_URL + friendName);
+            redirect(VS_FRIENDS_URL + friendName, hasBoard: true, boardName: BOARD_FRIEND2);
 
-            sendMessage("Desafio enviado para " + friendName);
 
             //var friendActions = (IWebElement)FindChildrenByClass(friend, "friends-list-find-actions")[0];
             //var memberActionsContainer = (IWebElement)FindChildrenByClass(friendActions, "member-actions-container")[0];
@@ -400,8 +474,8 @@ namespace AppGui
                 }
             }
         }
-
-        public void redirect(String URL, bool hasBoard = false, bool hasAd = false) {
+        
+        public void redirect(String URL, bool hasBoard = false, bool hasAd = false, string boardName = null) {
             driver.Navigate().GoToUrl(URL);
             
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
@@ -422,8 +496,13 @@ namespace AppGui
             }
 
             if (hasBoard) {
-                board = driver.FindElement(By.XPath(BOARD));
-
+                if (boardName == null)
+                {
+                    boardName = BOARD;
+                }
+                board = driver.FindElement(By.XPath(boardName));
+                Console.WriteLine("gamer board: " + board);
+                Console.WriteLine("gamer board: " + board.GetAttribute("class"));
                 playerColor = getPlayerColor(board);
                 pieceColor = "piece " + playerColor[0];
             }
@@ -627,7 +706,7 @@ namespace AppGui
                 piece = " square-" + getHorizontalNumber(from[0]) + from[1];
             }
 
-
+            Console.WriteLine("Before board: " + board);
             var possiblePieces = FindChildrenByClass(board, piece);
 
             if (possiblePieces.Count <= 1) {
@@ -922,6 +1001,7 @@ namespace AppGui
 
         static List<IWebElement> FindChildrenByClass(IWebElement element, string className)
         {
+            Console.WriteLine("sussy element: " + element);
             var children = element.FindElements(By.XPath(".//*"));
             var list = new List<IWebElement>();
             foreach (IWebElement child in children)
