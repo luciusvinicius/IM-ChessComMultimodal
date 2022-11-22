@@ -56,7 +56,9 @@ namespace speechModality
             sre.SpeechHypothesized += Sre_SpeechHypothesized;
 
             // NEW - TTS support 16 April
-            tts.Speak("Olá. Estou pronto para receber ordens.");
+            tts.Speak("Olá, eu me chamo Magnot, seu computador de Xadrez e" +
+                " Estou pronto para receber ordens. Inicie a outra aplicação " +
+                "AppGUI para começarmos.");
 
 
             //  o TTS  no final indica que se recebe mensagens enviadas para TTS
@@ -81,33 +83,6 @@ namespace speechModality
             // IMPORTANT TO KEEP THE FORMAT {"recognized":["SHAPE","COLOR"]}
 
             sendJson(e);
-
-            //float confidence = e.Result.Confidence;
-            //if (confidence < CONFIDENCE_BOTTOM_LIMIT) return;
-            //else if (confidence < CONFIDENCE_BOTTOM_UPPER_LIMIT)
-            //{
-            //    previousContext = e.Result.Semantics;
-            //    string phrase = "";
-            //    foreach (var resultSemantic in e.Result.Semantics) {
-            //        string semantic = resultSemantic.Value.Value.ToString();
-            //        if (semanticDict.ContainsKey(semantic)) {
-            //            phrase += semanticDict[semantic] + " ";
-            //        }
-            //        else
-            //        {
-            //            phrase += semantic + " ";
-            //        }
-            //    }
-            //    phrase = phrase.Substring(0, phrase.Length - 1);
-            //    phrase += "?";
-            //    System.Diagnostics.Debug.WriteLine("phrase: " + phrase);
-            //    tts.Speak(phrase);
-            //}
-            //else {
-            //    sendJson(e);
-            //}
-            
-            
 
         }
         

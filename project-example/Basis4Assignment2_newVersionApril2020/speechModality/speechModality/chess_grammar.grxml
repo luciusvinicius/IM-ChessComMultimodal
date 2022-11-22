@@ -170,11 +170,11 @@
 			<item repeat="0-1"> jogo </item>
 			<item repeat="0-1"> novo jogo </item>
 			<item repeat="0-1"> jogar</item>
+			<item repeat="0-1"> uma partida contra </item>
 		</one-of>
 		
 		<item repeat="0-1"> 
 			contra 
-			<tag>out.Action = "PLAY AGAINST";</tag>
 		</item>
 		
 		
@@ -186,6 +186,7 @@
 		<item repeat="0-1">
 			<ruleref uri="#againstEntity"/>
 			<tag>out.Entity = rules.latest();</tag>
+			<tag>out.Action = "PLAY AGAINST";</tag>
 		</item>
 
 	</rule>
@@ -200,7 +201,6 @@
 					amigo<tag>out="FRIEND"</tag>
 				</item>
 			</item>
-      
 		</one-of>
 	</rule>
   
