@@ -129,15 +129,15 @@ namespace AppGui
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
         
         // ------------------------ CONFIRMATIONS
-        Boolean mute = false;
+
+
 
         float CONFIDENCE_BOTTOM_LIMIT = 0.1f;
         float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.59f;
         Dictionary<string, string> semanticDict = new Dictionary<string, string>()
         {
             ["MOVE"] = "mover",
-            ["CAPTURE"] = "capturar",
-            ["PLAY AGAINST"] = "jogar contra",
+            ["CAPTURE"] = "capturar",            ["PLAY AGAINST"] = "jogar contra",
             ["END"] = "finalizar a partida",
             ["CAPTURE"] = "capturar",
             ["GO BACK"] = "voltar atrás",
@@ -244,8 +244,10 @@ namespace AppGui
             string action = getFromRecognized(dict, "Action", "");
 
             action = getCurrentOrUpdate(action, "action", "");
+            Console.WriteLine("hi");
 
             bool isConfident = true;
+            Console.WriteLine("bye");
 
             switch (action)
             {
@@ -394,21 +396,11 @@ namespace AppGui
                     break;
 
                 case "SOUND_MANIPULATION_OFF":
-                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
-                    {
-                        sendMessage(WRONG_PAGE_ERROR);
-                        return;
-                    }
-                    mute = muteGame(mute);
+                    soundOff();
                     break;
 
                 case "SOUND_MANIPULATION_ON":
-                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
-                    {
-                        sendMessage(WRONG_PAGE_ERROR);
-                        return;
-                    }
-                    mute = soundGame(mute);
+                    soundOn();
                     break;
 
                 default:
@@ -418,39 +410,40 @@ namespace AppGui
         }
 
         // ------------------------------ CAPTURE
-        public Boolean muteGame(Boolean sound_status)
+        public void soundOff()
         {
-            if (sound_status == false)
-            {
+            Console.WriteLine("Muting...");
+            IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
 
-                Console.WriteLine("value of mute", sound_status);
-                Console.WriteLine(sound_status);
-                Console.WriteLine("Muting...");
-                IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
-                settings_mute.Click();
+            settings_mute.Click();
+            bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(11) > div:nth-child(2) > label:nth-child(2) > div:nth-child(1)")).Selected;
+            Console.WriteLine(mute);
+
+            if (mute == true)
+            {
                 IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
                 buttonSound_mute.Click();
                 IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
                 save_mute.Click();
-                // Get all elements with a given ClassName
                 Console.WriteLine("aha");
-                return true;
+                Console.WriteLine(mute);
+
             }
             else
             {
                 sendMessage(GAME_MUTED_ALREADY);
-                return false;
             }
         }
-        public Boolean soundGame(Boolean sound_status)
+        public void soundOn()
         {
-            if (sound_status == true)
+            Console.WriteLine("A por som...");
+            IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
+            settings_mute.Click();
+            bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(11) > div:nth-child(2) > label:nth-child(2) > div:nth-child(1)")).Selected;
+
+            Console.WriteLine(mute);
+            if (mute == false)
             {
-                Console.WriteLine("Reactivate sound...");
-                Console.WriteLine("Mute value");
-                Console.WriteLine(sound_status);
-                IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
-                settings_mute.Click();
                 IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
                 buttonSound_mute.Click();
                 Console.WriteLine("conseguir ir ao botao");
@@ -458,12 +451,12 @@ namespace AppGui
                 save_mute.Click();
                 // Get all elements with a given ClassName
                 Console.WriteLine("aha");
-                return false;
+                Console.WriteLine(mute);
+
             }
             else
             {
                 sendMessage(GAME_WITH_SOUND_ALREADY);
-                return true;
             }
         }
 
