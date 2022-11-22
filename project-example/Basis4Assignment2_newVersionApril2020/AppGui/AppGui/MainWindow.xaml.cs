@@ -77,7 +77,7 @@ namespace AppGui
         static string FRIEND_WAIT_FOR_REQUEST = "Espere que o seu amigo aceite o pedido para começar a jogar.";
         static string LETS_PLAY = "Contra quem quer jogar? Computador ou amigos?";
         static string GAME_MUTED_ALREADY = "O jogo já esta sem som.";
-        static string GAME_WITH_SOUND_ALREADY = "O jogo já está com som.";S
+        static string GAME_WITH_SOUND_ALREADY = "O jogo já está com som.";
         static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
         static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
         static string WRONG_MOVE_ERROR = "Possibilidade de movimento não existente, poderia indicá-lo novamente?";
