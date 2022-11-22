@@ -54,6 +54,14 @@
 			<ruleref uri="#SpecialMoves"/>
 			<tag> out = rules.latest() </tag>
 		  </item>
+      <item>
+        <ruleref uri="#GameSoundOn"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#GameSoundOff"/>
+        <tag> out = rules.latest() </tag>
+      </item>
 		</one-of>
 		<item repeat="0-1">
 			por favor
@@ -78,7 +86,8 @@
 	<example> Inicia um novo jogo </example>
 	<example> Quero começar a jogar </example>
 	<example> Gostava de começar a jogar </example>
-	  
+  <example> Pretendo iniciar uma partida </example>
+
     <one-of>
         <item> começar</item>
         <item> iniciar</item>
@@ -92,6 +101,10 @@
     <one-of>
       <item repeat="0-1"> jogo </item>
       <item repeat="0-1"> novo jogo </item>
+      <item repeat="0-1"> nova partida </item>
+      <item repeat="0-1"> partida </item>
+
+
     </one-of>
  </rule>
 
@@ -131,12 +144,17 @@
 			<item repeat="0-1">Quero</item>
 			<item repeat="0-1">Gostava de</item>
 			<item repeat="0-1">Por favor</item>
+      <item repeat="0-1">Pretendo</item>
+      <item repeat="0-1">Por favor</item>
 		</one-of>
 
 		<one-of>
 			<item repeat="0-1"> jogo </item>
 			<item repeat="0-1"> novo jogo </item>
 			<item repeat="0-1"> jogar</item>
+      <item repeat="0-1"> nova partida </item>
+      <item repeat="0-1"> partida </item>
+
 		</one-of>
 		
 		<item repeat="0-1"> 
@@ -605,4 +623,24 @@
 			</item>
 		</one-of>
 	</rule>
+  <rule id="GameSoundOff">
+    <one-of>
+      <item> silênciar </item>
+      <item> silência </item>
+      <item> Muta </item>
+      <item> Mutar </item>
+    </one-of>
+    <tag>out.Action = "SOUND_MANIPULATION_OFF"</tag>
+    <item repeat="0-1"> o jogo </item>
+  </rule>
+
+  <rule id="GameSoundOn">
+    <item repeat="0-1"> jogar com</item>
+    <one-of>
+			<item> ativar som </item>
+			<item> som </item>
+    </one-of>
+    <item repeat="0-1"> do jogo</item>
+    <tag>out.Action="SOUND_MANIPULATION_ON"</tag>
+  </rule>
 </grammar>
