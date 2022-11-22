@@ -130,7 +130,7 @@
 	<rule id="GoBack">
 		<item>
 			voltar atrás
-			<tag>out.Action = "BACK";</tag>
+			<tag>out.Action = "GO BACK";</tag>
 		</item>
 	</rule>
 
@@ -274,7 +274,7 @@
 
       <item repeat="0-1">
         <ruleref uri="#Piece"/>
-        <tag> out.Entity = rules.latest(); </tag>
+        <tag> out.Target = rules.latest(); </tag>
       </item>
       <item repeat="0-1">
         <one-of>
@@ -297,7 +297,7 @@
           </item>
         </one-of>
       </item>
-    <item>
+    <item repeat="0-1">
       com
     </item>
      <item repeat="0-1">
