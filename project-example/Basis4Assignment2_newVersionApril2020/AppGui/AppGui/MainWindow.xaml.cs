@@ -68,24 +68,62 @@ namespace AppGui
         static string VS_FRIENDS_URL = "https://www.chess.com/play/online/new?opponent=";
 
         // ------------------------ PHRASES
-        static List<string> FRIEND_CHOOSE = new List<string>() {"Escolha um amigo dentre a lista de amigos"};
-        static List<string> LOADING = new List<string>() { "Estamos carregando. Por favor, aguarde.", "Por favor, espere um pouco enquanto carregamos as configurações." };
-        static List<string> REPEAT_PHRASE = new List<string>() {"Então poderia repetir a frase novamnte?"};
-        static List<string> GAME_STARTED = new List<string>() {"Jogo iniciado! Tenha um bom jogo!"};
-        static List<string> GAME_ENDED = new List<string>() {"Jogo finalizado!"};
-        static List<string> FRIEND_WAIT_FOR_REQUEST = new List<string>() {"Espere que o seu amigo aceite o pedido para começar a jogar."};
-        static List<string> LETS_PLAY = new List<string>() {"Contra quem quer jogar? Computador ou amigos?"};
+        static List<string> FRIEND_CHOOSE = new List<string>() {
+            "Escolha um amigo dentre a lista de amigos"
+        };
+        static List<string> LOADING = new List<string>() { 
+            "Estamos carregando. Por favor, aguarde.", 
+            "Por favor, espere um pouco enquanto carregamos as configurações." 
+        };
+        static List<string> REPEAT_PHRASE = new List<string>() {
+            "Então poderia repetir a frase novamnte?"
+        };
+        static List<string> GAME_STARTED = new List<string>() {
+            "Jogo iniciado! Tenha um bom jogo!"
+        };
+        static List<string> GAME_ENDED = new List<string>() {
+            "Jogo finalizado!"
+        };
+        static List<string> FRIEND_WAIT_FOR_REQUEST = new List<string>() {
+            "Espere que o seu amigo aceite o pedido para começar a jogar."
+        };
+        static List<string> LETS_PLAY = new List<string>() {
+            "Contra quem quer jogar? Computador ou amigos?"
+        };
         
-        static List<string> GAME_MUTED_ALREADY = new List<string>() {"O jogo já esta sem som."};
-        static List<string> GAME_WITH_SOUND_ALREADY = new List<string>() { "O jogo já está com som." };
+        static List<string> GAME_MUTED_ALREADY = new List<string>() {
+            "O jogo já esta sem som."
+        };
+        static List<string> GAME_WITH_SOUND_ALREADY = new List<string>() { 
+            "O jogo já está com som."
+        };
 
-        static List<string> NO_KNOWN_PIECE_ERROR = new List<string>() {"Não consegui identificar a peça, poderia indicá-la novamente?"};
-        static List<string> NO_KNOWN_ACTION_ERROR = new List<string>() {"Não consegui identificar a ação, poderia indicá-la novamente?"};
-        static List<string> WRONG_MOVE_ERROR = new List<string>() { "Possibilidade de movimento não existente, poderia indicá-lo novamente?", "Não existe essa possibilidade de movimento, poderia indicá-lo novamente?" };
-        static List<string> AMBIGUOS_MOVEMENT = new List<string>() {"Existe mais de um movimento possível para essa peça, poderia indicar o destino?"};
-        static List<string> AMBIGUOS_PIECE = new List<string>() {"Existe mais de uma peça com essa descrição, poderia indicar a peça?"};
-        static List<string> FRIEND_CHOOSE_COUNT_ERROR = new List<string>() {"Amigo não encontrado, por favor, tente novamente"};
-        static List<string> ROQUE_NOT_POSSIBLE = new List<string>() { "Não é possível realizar o movimento 'roque' no momento." };
+        static List<string> NO_KNOWN_PIECE_ERROR = new List<string>() {
+            "Não consegui identificar a peça, poderia indicá-la novamente?"
+        };
+        static List<string> NO_KNOWN_ACTION_ERROR = new List<string>() {
+            "Não consegui identificar a ação, poderia indicá-la novamente?"
+        };
+        static List<string> WRONG_MOVE_ERROR = new List<string>() { 
+            "Possibilidade de movimento não existente, poderia indicá-lo novamente?"
+            , "Não existe essa possibilidade de movimento, poderia indicá-lo novamente?" 
+        };
+        static List<string> AMBIGUOS_MOVEMENT = new List<string>() {
+            "Existe mais de um movimento possível para essa peça, poderia indicar o destino?"
+        };
+        static List<string> AMBIGUOS_PIECE = new List<string>() {
+            "Existe mais de uma peça com essa descrição, poderia indicar a peça?"
+        };
+        static List<string> FRIEND_CHOOSE_COUNT_ERROR = new List<string>() {
+            "Amigo não encontrado, por favor, tente novamente"
+        };
+        static List<string> ROQUE_NOT_POSSIBLE = new List<string>() { 
+            "Não é possível realizar o movimento 'roque' no momento." 
+        };
+        static List<string> WRONG_PAGE_ERROR = new List<string>() {
+            "Você não está na página correta para realizar essa ação. Por favor, tente mudar de página e tente novamente. ",
+            "Infelizmente a ação sugerida não pode ser aplicada nesta página. Por favor, tente mudar de página e tente novamente. "
+        };
 
         static string CONFIRM_CHOICE = "Você deseja";
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
@@ -218,6 +256,11 @@ namespace AppGui
                     break;
 
                 case "END":
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
                     Console.WriteLine("GIVE UP");
                     if (!ignoreConfidence) {
                         isConfident = generateConfidence(confidence, dict, forceConfidence: true);
@@ -229,6 +272,11 @@ namespace AppGui
                     break;
                     
                 case "MOVE":
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
                     Console.WriteLine("MOVE");
                     string from = getFromRecognized(dict, "PositionInitial");
                     string to = getFromRecognized(dict, "PositionFinal");
@@ -272,6 +320,11 @@ namespace AppGui
                     break;
 
                 case "SPECIAL":
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
                     String specialMove = getFromRecognized(dict, "SpecialMove");
                     if (specialMove == "ROQUE")
                     {
@@ -290,6 +343,11 @@ namespace AppGui
                     }
                     break;
                 case "CAPTURE":
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
                     Console.WriteLine("CAPTURING");
                     string initialPos = getFromRecognized(dict, "PositionInitial");
                     string finalPos = getFromRecognized(dict, "PositionFinal");
@@ -336,10 +394,20 @@ namespace AppGui
                     break;
 
                 case "SOUND_MANIPULATION_OFF":
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
                     mute = muteGame(mute);
                     break;
 
                 case "SOUND_MANIPULATION_ON":
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
                     mute = soundGame(mute);
                     break;
 

@@ -17,6 +17,11 @@ namespace speechModality
         private static SpeechRecognitionEngine sre= new SpeechRecognitionEngine(new System.Globalization.CultureInfo("pt-PT"));
         private Grammar gr;
 
+        private List<string> initial_phrases = new List<string>() {
+            "Olá, eu me chamo Magnot, seu programa de Xadrez e Estou pronto para receber ordens. Inicie a outra aplicação AppGUI para começarmos.",
+            "Olá, sou o Magnot. Estás pronto para mais uma partida de xadrez? Basta abrir o AppGUI, a outra aplicação, e serás levado para a aplicação web."
+        };
+
 
         public event EventHandler<SpeechEventArg> Recognized;
         protected virtual void onRecognized(SpeechEventArg msg)
@@ -56,9 +61,11 @@ namespace speechModality
             sre.SpeechHypothesized += Sre_SpeechHypothesized;
 
             // NEW - TTS support 16 April
-            tts.Speak("Olá, eu me chamo Magnot, seu computador de Xadrez e" +
-                " Estou pronto para receber ordens. Inicie a outra aplicação " +
-                "AppGUI para começarmos.");
+            Random rnd = new Random();
+            int index = rnd.Next(initial_phrases.Count);
+            string phrase = initial_phrases[index];
+
+            tts.Speak(phrase);
 
 
             //  o TTS  no final indica que se recebe mensagens enviadas para TTS
