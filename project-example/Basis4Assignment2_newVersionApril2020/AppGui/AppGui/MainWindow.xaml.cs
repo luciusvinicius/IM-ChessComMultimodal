@@ -84,18 +84,21 @@ namespace AppGui
         static string AMBIGUOS_MOVEMENT = "Existe mais de um movimento possível para essa peça, poderia indicar o destino?";
         static string AMBIGUOS_PIECE = "Existe mais de uma peça com essa descrição, poderia indicar a peça?";
         static string FRIEND_CHOOSE_COUNT_ERROR = "Amigo não encontrado, por favor, tente novamente";
+        static string ROQUE_NOT_POSSIBLE = "Não é possível realizar o movimento 'roque' no momento.";
 
         // ------------------------ CONFIRMATIONS
 
         
         float CONFIDENCE_BOTTOM_LIMIT = 0.1f;
-        float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.59f;
+        float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.99f;
         Dictionary<string, string> semanticDict = new Dictionary<string, string>()
         {
             ["MOVE"] = "mover",
             ["CAPTURE"] = "capturar",
             ["PLAY AGAINST"] = "jogar contra",
             ["END"] = "finalizar a partida",
+            ["CAPTURE"] = "capturar",
+            ["GO BACK"] = "voltar atrás",
             ["WHITE"] = "branco",
             ["BLACK"] = "preto",
             ["KING"] = "rei",
@@ -106,6 +109,7 @@ namespace AppGui
             ["PAWN"] = "peão",
             ["TO"] = "para",
             ["FROM"] = "de",
+            ["WITH"] = "com",
             ["RIGHT"] = "direita",
             ["LEFT"] = "esquerda",
             ["FRONT"] = "frente",
@@ -133,20 +137,6 @@ namespace AppGui
 
         public MainWindow()
         {
-
-            //var amogus = new List<Class1>();
-            //amogus.Add(new Class1("The Lord of the Rings", "J.R.R. Tolkien", 1178));
-            //amogus.Add(new Class1("The Hobbit", "J.R.R. Tolkien", 310));
-            //amogus.Add(new Class1("The Silmarillion", "J.R.R. Tolkien", 429));
-            //amogus.Add(new Class1("The Children of Hurin", "J.R.R. Tolkien", 288));
-
-            //amogus.Sort((x, y) => y.pagecount - x.pagecount);
-
-            //for (int i = 0; i < amogus.Count; i++)
-            //{
-            //    Console.WriteLine(amogus[i].GetDescription());
-            //}
-            //InitializeComponent();
 
             FirefoxOptions options = new FirefoxOptions();
             options.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe"); //location where Firefox is installed
@@ -314,17 +304,29 @@ namespace AppGui
 
                     finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
                     string target = getFromRecognized(dict, "Target");
-                    capture(
+                    if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
+                    if (isConfident)
+                    {
+                        capture(
                             pieces: possiblePieces,
                             to: finalPos,
                             number: finalNumer,
                             targetName: target
                         );
+                    }
 
                     break;
 
-                case "BACK":
-                    driver.Navigate().Back();
+                case "GO BACK": 
+                    Console.WriteLine("GO BACK");
+                    if (!ignoreConfidence)
+                    {
+                        isConfident = generateConfidence(confidence, dict, forceConfidence: true);
+                    }
+                    if (isConfident)
+                    {
+                        driver.Navigate().Back();
+                    }
                     break;
 
                 default:
@@ -403,7 +405,13 @@ namespace AppGui
             }
             else if (correctPieces.Count > 1)
             {
+                correctPieces[correctPieces.Count - 1].Click();
                 sendMessage(AMBIGUOS_PIECE);
+            }
+            else if (pieces.Count == 1)
+            {
+                pieces[pieces.Count - 1].Click();
+                sendMessage(WRONG_MOVE_ERROR);
             }
             else
             {
@@ -460,6 +468,11 @@ namespace AppGui
                     case "PLAY AGAINST":
                         if (context["Entity"] == "FRIEND") phrase += getPhraseFromContext("Number", "º");
                         phrase += getFromSemanticDict(context["Entity"]);
+                        break;
+
+                    case "CAPTURE":
+                        phrase += getFromSemanticDict(context["Target"]);
+                        phrase += getFromSemanticDict("WITH") + getFromSemanticDict(context["Entity"]);
                         break;
 
                 }
@@ -687,7 +700,13 @@ namespace AppGui
             }
             else if (correctPieces.Count > 1)
             {
+                correctPieces[correctPieces.Count - 1].Click();
                 sendMessage(AMBIGUOS_PIECE);
+            }
+            else if (pieces.Count == 1)
+            {
+                pieces[pieces.Count - 1].Click();
+                sendMessage(WRONG_MOVE_ERROR);
             }
             else
             {
@@ -1036,10 +1055,13 @@ namespace AppGui
                     {
                         //Fazer jogada
                         performMove(move);
+                        return;
                     }
-
                     //Arraylist dos Web elements, pegar nas classes deles e ver se estão 2 posicoes seguidas
                 }
+
+                sendMessage(ROQUE_NOT_POSSIBLE);
+                possiblePieces[0].Click();
             }
         }
 
