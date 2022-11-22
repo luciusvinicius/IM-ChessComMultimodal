@@ -68,27 +68,28 @@ namespace AppGui
         static string VS_FRIENDS_URL = "https://www.chess.com/play/online/new?opponent=";
 
         // ------------------------ PHRASES
-        static string FRIEND_CHOOSE = "Escolha um amigo dentre a lista de amigos";
+        static List<string> FRIEND_CHOOSE = new List<string>() {"Escolha um amigo dentre a lista de amigos"};
+        static List<string> LOADING = new List<string>() { "Estamos carregando. Por favor, aguarde.", "Por favor, espere um pouco enquanto carregamos as configurações." };
+        static List<string> REPEAT_PHRASE = new List<string>() {"Então poderia repetir a frase novamnte?"};
+        static List<string> GAME_STARTED = new List<string>() {"Jogo iniciado! Tenha um bom jogo!"};
+        static List<string> GAME_ENDED = new List<string>() {"Jogo finalizado!"};
+        static List<string> FRIEND_WAIT_FOR_REQUEST = new List<string>() {"Espere que o seu amigo aceite o pedido para começar a jogar."};
+        static List<string> LETS_PLAY = new List<string>() {"Contra quem quer jogar? Computador ou amigos?"};
+
+        static List<string> NO_KNOWN_PIECE_ERROR = new List<string>() {"Não consegui identificar a peça, poderia indicá-la novamente?"};
+        static List<string> NO_KNOWN_ACTION_ERROR = new List<string>() {"Não consegui identificar a ação, poderia indicá-la novamente?"};
+        static List<string> WRONG_MOVE_ERROR = new List<string>() { "Possibilidade de movimento não existente, poderia indicá-lo novamente?", "Não existe essa possibilidade de movimento, poderia indicá-lo novamente?" };
+        static List<string> AMBIGUOS_MOVEMENT = new List<string>() {"Existe mais de um movimento possível para essa peça, poderia indicar o destino?"};
+        static List<string> AMBIGUOS_PIECE = new List<string>() {"Existe mais de uma peça com essa descrição, poderia indicar a peça?"};
+        static List<string> FRIEND_CHOOSE_COUNT_ERROR = new List<string>() {"Amigo não encontrado, por favor, tente novamente"};
+        static List<string> ROQUE_NOT_POSSIBLE = new List<string>() { "Não é possível realizar o movimento 'roque' no momento." };
+
         static string CONFIRM_CHOICE = "Você deseja";
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
-        static string REPEAT_PHRASE = "Então poderia repetir a frase novamnte?";
-        static string GAME_STARTED = "Jogo iniciado! Tenha um bom jogo!";
-        static string GAME_ENDED = "Jogo finalizado!";
-        static string FRIEND_WAIT_FOR_REQUEST = "Espere que o seu amigo aceite o pedido para começar a jogar.";
-        static string LETS_PLAY = "Contra quem quer jogar? Computador ou amigos?";
-
-        static string NO_KNOWN_PIECE_ERROR = "Não consegui identificar a peça, poderia indicá-la novamente?";
-        static string NO_KNOWN_ACTION_ERROR = "Não consegui identificar a ação, poderia indicá-la novamente?";
-        static string WRONG_MOVE_ERROR = "Possibilidade de movimento não existente, poderia indicá-lo novamente?";
-        static string NO_POSSIBLE_MOVES_ERROR = "Não existem movimentos possíveis para essa peça";
-        static string AMBIGUOS_MOVEMENT = "Existe mais de um movimento possível para essa peça, poderia indicar o destino?";
-        static string AMBIGUOS_PIECE = "Existe mais de uma peça com essa descrição, poderia indicar a peça?";
-        static string FRIEND_CHOOSE_COUNT_ERROR = "Amigo não encontrado, por favor, tente novamente";
-        static string ROQUE_NOT_POSSIBLE = "Não é possível realizar o movimento 'roque' no momento.";
-
+        
         // ------------------------ CONFIRMATIONS
 
-        
+
         float CONFIDENCE_BOTTOM_LIMIT = 0.1f;
         float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.59f;
         Dictionary<string, string> semanticDict = new Dictionary<string, string>()
@@ -138,21 +139,6 @@ namespace AppGui
         public MainWindow()
         {
 
-            FirefoxOptions options = new FirefoxOptions();
-            options.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe"); //location where Firefox is installed
-            driver = new FirefoxDriver(options);
-            
-            redirect(LOGIN_URL);
-            
-            IWebElement username_field = driver.FindElement(By.Id(USERNAME_FIELD));
-            username_field.SendKeys(USERNAME);
-            IWebElement password_field = driver.FindElement(By.Id(PASSWORD_FIELD));
-            password_field.SendKeys(PASSWORD);
-            IWebElement login_button = driver.FindElement(By.Id(LOGIN_BUTTON));
-            login_button.Click();
-
-            driver.Manage().Window.Maximize();
-
             mmiC = new MmiCommunication("localhost", 8000, "User1", "GUI");
             mmiC.Message += MmiC_Message;
             mmiC.Start();
@@ -162,6 +148,23 @@ namespace AppGui
             lce = new LifeCycleEvents("APP", "TTS", "User1", "na", "command"); // LifeCycleEvents(string source, string target, string id, string medium, string mode
             // MmiCommunication(string IMhost, int portIM, string UserOD, string thisModalityName)
             mmic = new MmiCommunication("localhost", 8000, "User1", "GUI");
+
+            sendMessage(LOADING);
+
+            FirefoxOptions options = new FirefoxOptions();
+            options.BrowserExecutableLocation = ("C:\\Program Files\\Mozilla Firefox\\firefox.exe"); //location where Firefox is installed
+            driver = new FirefoxDriver(options);
+
+            redirect(LOGIN_URL);
+
+            IWebElement username_field = driver.FindElement(By.Id(USERNAME_FIELD));
+            username_field.SendKeys(USERNAME);
+            IWebElement password_field = driver.FindElement(By.Id(PASSWORD_FIELD));
+            password_field.SendKeys(PASSWORD);
+            IWebElement login_button = driver.FindElement(By.Id(LOGIN_BUTTON));
+            login_button.Click();
+
+            driver.Manage().Window.Maximize();
 
             sendMessage(LETS_PLAY);
             //play();
@@ -481,7 +484,7 @@ namespace AppGui
                 phrase = phrase.Trim() + "?" + END_CONFIRM_CHOICE;
                 Console.WriteLine("Confident Message: " + phrase);
                 //Confident Message: Você deseja MOVE mover peão de esquerda para frente
-                sendMessage(phrase);
+                sendMessage(new List<string>() { phrase });
             }
 
             return isConfident;
@@ -551,8 +554,9 @@ namespace AppGui
 
                 string friendName = driver.Url.Substring(driver.Url.LastIndexOf("=") + 1);
                 Console.WriteLine("Friend name: " + friendName);
-                sendMessage("Desafio enviado para " + friendName + ". " + FRIEND_WAIT_FOR_REQUEST);
-                
+                string msg = "Desafio enviado para " + friendName + ". " + FRIEND_WAIT_FOR_REQUEST;
+                sendMessage(new List<string>() { msg });
+
             }
 
 
@@ -1217,9 +1221,14 @@ namespace AppGui
             return defaultVal;
         }
         
-        public void sendMessage(String message) {
+        public void sendMessage(List<string> message) {
+            // select random from list message
+            Random rnd = new Random();
+            int index = rnd.Next(message.Count);
+            string msg = message[index];
+
             mmic.Send(lce.NewContextRequest());
-            var exNot = lce.ExtensionNotification(0 + "", 0 + "", 1, message);
+            var exNot = lce.ExtensionNotification(0 + "", 0 + "", 1, msg);
             mmic.Send(exNot);
         }
 
