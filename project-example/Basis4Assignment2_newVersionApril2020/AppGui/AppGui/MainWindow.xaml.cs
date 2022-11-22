@@ -90,7 +90,7 @@ namespace AppGui
 
         
         float CONFIDENCE_BOTTOM_LIMIT = 0.1f;
-        float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.99f;
+        float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.59f;
         Dictionary<string, string> semanticDict = new Dictionary<string, string>()
         {
             ["MOVE"] = "mover",
