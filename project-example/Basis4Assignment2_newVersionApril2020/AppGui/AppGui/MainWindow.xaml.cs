@@ -75,6 +75,9 @@ namespace AppGui
         static List<string> GAME_ENDED = new List<string>() {"Jogo finalizado!"};
         static List<string> FRIEND_WAIT_FOR_REQUEST = new List<string>() {"Espere que o seu amigo aceite o pedido para começar a jogar."};
         static List<string> LETS_PLAY = new List<string>() {"Contra quem quer jogar? Computador ou amigos?"};
+        
+        static List<string> GAME_MUTED_ALREADY = new List<string>() {"O jogo já esta sem som."};
+        static List<string> GAME_WITH_SOUND_ALREADY = new List<string>() { "O jogo já está com som." };
 
         static List<string> NO_KNOWN_PIECE_ERROR = new List<string>() {"Não consegui identificar a peça, poderia indicá-la novamente?"};
         static List<string> NO_KNOWN_ACTION_ERROR = new List<string>() {"Não consegui identificar a ação, poderia indicá-la novamente?"};
