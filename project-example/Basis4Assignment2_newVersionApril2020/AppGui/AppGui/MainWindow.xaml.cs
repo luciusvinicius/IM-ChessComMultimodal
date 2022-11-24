@@ -414,20 +414,32 @@ namespace AppGui
         {
             Console.WriteLine("Muting...");
             IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
+            Console.WriteLine("Mutingx2...");
+            Actions action = new Actions(driver);
+            action.MoveToElement(settings_mute).Click().Perform();
+            System.Threading.Thread.Sleep(WAIT_TIME);
 
-            settings_mute.Click();
             bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(11) > div:nth-child(2) > label:nth-child(2) > div:nth-child(1)")).Selected;
             Console.WriteLine(mute);
 
-            if (mute == true)
+            if (mute == false)
             {
-                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
-                buttonSound_mute.Click();
-                IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
-                save_mute.Click();
-                Console.WriteLine("aha");
-                Console.WriteLine(mute);
+                Actions actionSound = new Actions(driver);
+                
+                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings - field - row:nth - child(9) > div:nth - child(2) > label:nth - child(2)"));
+                actionSound.MoveToElement(buttonSound_mute).Click().Perform();
 
+                Console.WriteLine(mute);
+                System.Threading.Thread.Sleep(WAIT_TIME);
+
+                Actions actionSave = new Actions(driver);
+                Console.WriteLine("~weppaa ir ao botao");
+                IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
+                Console.WriteLine("passei no botao");
+                actionSave.MoveToElement(save_mute).Click().Perform();
+                Console.WriteLine("cliquei");
+                Console.WriteLine(mute);
+                Console.WriteLine("aha");
             }
             else
             {
@@ -438,18 +450,32 @@ namespace AppGui
         {
             Console.WriteLine("A por som...");
             IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
-            settings_mute.Click();
-            bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(11) > div:nth-child(2) > label:nth-child(2) > div:nth-child(1)")).Selected;
+            System.Threading.Thread.Sleep(WAIT_TIME);
 
+            Console.WriteLine("passei no settings on");
+            Actions action = new Actions(driver);
+            action.MoveToElement(settings_mute).Click().Perform();
+
+            Console.WriteLine("e aqui tb");
+
+            bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)")).Selected;
             Console.WriteLine(mute);
             if (mute == false)
             {
-                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
-                buttonSound_mute.Click();
+                Actions actionSound = new Actions(driver);
+                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings - field - row:nth - child(9) > div:nth - child(2) > label:nth - child(2)"));
+                actionSound.MoveToElement(buttonSound_mute).Click().Perform();
                 Console.WriteLine("conseguir ir ao botao");
+                System.Threading.Thread.Sleep(WAIT_TIME);
+
+                Console.WriteLine(mute);
+
+                Actions actionSave = new Actions(driver);
+
                 IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
-                save_mute.Click();
-                // Get all elements with a given ClassName
+                Console.WriteLine("passei no botao");
+                actionSave.MoveToElement(save_mute).Click().Perform();
+                Console.WriteLine("cliquei");
                 Console.WriteLine("aha");
                 Console.WriteLine(mute);
 
@@ -459,6 +485,7 @@ namespace AppGui
                 sendMessage(GAME_WITH_SOUND_ALREADY);
             }
         }
+
 
         public List<IWebElement> getPossiblePiecesCapture(String pieceName = null, 
             String from = null, int number = 1)
