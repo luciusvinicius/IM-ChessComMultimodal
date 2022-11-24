@@ -35,10 +35,6 @@
 				<tag> out = rules.latest() </tag>
 			</item>
 			<item>
-				<ruleref uri="#ControlBot"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-			<item>
 				<ruleref uri="#PlayWith"/>
 				<tag> out = rules.latest() </tag>
 			</item>
@@ -370,20 +366,6 @@
     <tag>out.Action="SPECIAL" </tag> 
     
     
-  </rule>
-
-  <rule id="ControlBot">
-    <item repeat="0-1"> Por favor </item>
-    <one-of>
-			<item>
-				silêncio<tag>out="SILENT"</tag>
-			</item>
-      <item>
-        narrar<tag>out="NARRATE"</tag>
-      </item>
-    </one-of>
-    <item repeat="0-1"> Por favor </item>
-
   </rule>
 
 	<rule id="Piece">
