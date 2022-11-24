@@ -371,20 +371,6 @@
     
   </rule>
 
-  <rule id="ControlBot">
-    <item repeat="0-1"> Por favor </item>
-    <one-of>
-			<item>
-				silêncio<tag>out="SILENT"</tag>
-			</item>
-      <item>
-        narrar<tag>out="NARRATE"</tag>
-      </item>
-    </one-of>
-    <item repeat="0-1"> Por favor </item>
-
-  </rule>
-
 	<rule id="Piece">
 		<example> cavalo </example>
 		<example> bispo </example>
