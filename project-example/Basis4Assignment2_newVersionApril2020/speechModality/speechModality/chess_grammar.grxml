@@ -1,138 +1,138 @@
 ﻿<?xml version="1.0"?>
 <grammar xml:lang="pt-PT" version="1.0" xmlns="http://www.w3.org/2001/06/grammar" tag-format="semantics/1.0">
-	<rule id="rootRule" scope="public">
-		<item repeat="0-1">
-			magnot
-		</item>
-		<item repeat="0-1">
-			por favor
-		</item>
-		<item repeat="0-1">
-			<one-of>
-				<item> gostava de </item>
-				<item> gostaria de </item>
-				<item> quero </item>
-				<item> queria </item>
-				<item> pretendo </item>
-				<item> quero </item>
-			</one-of>
-		</item>
-		<one-of>
-			<item>
-				<ruleref uri="#Answer"/>
-				<tag>out = rules.latest()</tag>
-			</item>
-			<item>
-				<ruleref uri="#Start"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-			 <item>
-				<ruleref uri="#GoBack"/>
-				<tag> out = rules.latest() </tag>
-			  </item>
-			<item>
-				<ruleref uri="#PlayPiece"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-			<item>
-				<ruleref uri="#ControlBot"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-			<item>
-				<ruleref uri="#PlayWith"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-			<item>
-				<ruleref uri="#End"/>
-				<tag> out = rules.latest() </tag>
-			</item>
-		  <item>
-			<ruleref uri="#Capture"/>
-			<tag> out = rules.latest() </tag>
-		  </item>
-		  <item>
-			<ruleref uri="#SpecialMoves"/>
-			<tag> out = rules.latest() </tag>
-		  </item>
+  <rule id="rootRule" scope="public">
+    <item repeat="0-1">
+      magnot
+    </item>
+    <item repeat="0-1">
+      por favor
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> gostava de </item>
+        <item> gostaria de </item>
+        <item> quero </item>
+        <item> queria </item>
+        <item> pretendo </item>
+        <item> quero </item>
+      </one-of>
+    </item>
+    <one-of>
       <item>
-      <ruleref uri="#GameSoundOn"/>
-      <tag> out = rules.latest() </tag>
+        <ruleref uri="#Answer"/>
+        <tag>out = rules.latest()</tag>
+      </item>
+      <item>
+        <ruleref uri="#Start"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#GoBack"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#PlayPiece"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#ControlBot"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#PlayWith"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#End"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#Capture"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#SpecialMoves"/>
+        <tag> out = rules.latest() </tag>
+      </item>
+      <item>
+        <ruleref uri="#GameSoundOn"/>
+        <tag> out = rules.latest() </tag>
       </item>
       <item>
         <ruleref uri="#GameSoundOff"/>
         <tag> out = rules.latest() </tag>
       </item>
-		</one-of>
-		<item repeat="0-1">
-			por favor
-		</item>
-  
-	</rule>
-
-	<rule id="Answer">
-		<one-of>
-			<item>
-				Sim <tag>out.Entity = "YES"</tag>
-			</item>
-			<item>
-				Não <tag>out.Entity = "NO"</tag>
-			</item>
-		</one-of>
-		<tag>out.Action = "ANSWER"</tag>
-	</rule>
-	
-  <rule id="Start">
-	<example> Começar a jogar </example>
-	<example> Por favor, começa o jogo </example>
-	<example> Inicia um novo jogo </example>
-	<example> Quero começar a jogar </example>
-	<example> Gostava de começar a jogar </example>
-  <example> Pretendo iniciar uma partida </example>
-    
-   <one-of>
-        <item> começar</item>
-        <item> iniciar</item>
-        <item> começa</item>
-        <item> inicia</item>
-				<item> jogar </item>
     </one-of>
-	<tag>out.Action = "START"</tag>
-	<tag>out.Entity = "GAME"</tag>
-	  
+    <item repeat="0-1">
+      por favor
+    </item>
+
+  </rule>
+
+  <rule id="Answer">
+    <one-of>
+      <item>
+        Sim <tag>out.Entity = "YES"</tag>
+      </item>
+      <item>
+        Não <tag>out.Entity = "NO"</tag>
+      </item>
+    </one-of>
+    <tag>out.Action = "ANSWER"</tag>
+  </rule>
+
+  <rule id="Start">
+    <example> Começar a jogar </example>
+    <example> Por favor, começa o jogo </example>
+    <example> Inicia um novo jogo </example>
+    <example> Quero começar a jogar </example>
+    <example> Gostava de começar a jogar </example>
+    <example> Pretendo iniciar uma partida </example>
+
+    <one-of>
+      <item> começar</item>
+      <item> iniciar</item>
+      <item> começa</item>
+      <item> inicia</item>
+      <item> jogar </item>
+    </one-of>
+    <tag>out.Action = "START"</tag>
+    <tag>out.Entity = "GAME"</tag>
+
     <one-of>
       <item repeat="0-1"> jogo </item>
       <item repeat="0-1"> novo jogo </item>
       <item repeat="0-1"> nova partida </item>
       <item repeat="0-1"> partida </item>
-      
+
     </one-of>
- </rule>
+  </rule>
 
-  
-    <rule id="End">
-		<example> Quero acabar o jogo </example>
-		<example> Gostava de desistir </example>
-		<example> Acaba com este jogo </example>
-		<example> Pretendo sair do jogo </example>
-      
-		<one-of>
-			<item> acabar </item>
-			<item> desistir </item>
-			<item> termina </item>
-			<item> acaba </item>
-			<item> sair </item>
-		</one-of>
-		<tag>out.Action = "END"</tag>
 
-		<item repeat="0-1"> jogo </item>
-    </rule>
+  <rule id="End">
+    <example> Quero acabar o jogo </example>
+    <example> Gostava de desistir </example>
+    <example> Acaba com este jogo </example>
+    <example> Pretendo sair do jogo </example>
 
-	<rule id="GoBack">
-		<item>
-			voltar atrás
-			<tag>out.Action = "GO BACK";</tag>
-		</item>
-	</rule>
+    <one-of>
+      <item> acabar </item>
+      <item> desistir </item>
+      <item> termina </item>
+      <item> acaba </item>
+      <item> sair </item>
+    </one-of>
+    <tag>out.Action = "END"</tag>
+
+    <item repeat="0-1"> jogo </item>
+  </rule>
+
+  <rule id="GoBack">
+    <item>
+      voltar atrás
+      <tag>out.Action = "GO BACK";</tag>
+    </item>
+  </rule>
 
   <rule id="GameSoundOff">
     <one-of>
@@ -154,197 +154,197 @@
     <item repeat="0-1"> do jogo</item>
     <tag>out.Action="SOUND_MANIPULATION_ON"</tag>
   </rule>
-  
-	<rule id="PlayWith">
-		<example>Quero jogar contra o computador </example>
-		<example>Pretendo jogar contra o 2º amigo </example>
 
-		<one-of>
-			<item repeat="0-1">Começa</item>
-			<item repeat="0-1">Quero</item>
-			<item repeat="0-1">Gostava de</item>
-			<item repeat="0-1">Por favor</item>
-		</one-of>
+  <rule id="PlayWith">
+    <example>Quero jogar contra o computador </example>
+    <example>Pretendo jogar contra o 2º amigo </example>
 
-		<one-of>
-			<item repeat="0-1"> jogo </item>
-			<item repeat="0-1"> novo jogo </item>
-			<item repeat="0-1"> jogar</item>
-			<item repeat="0-1"> uma partida contra </item>
-		</one-of>
-		
-		<item repeat="0-1"> 
-			contra 
-		</item>
-		
-		
-		<item repeat="0-1">
-			<ruleref uri="#Number"/>
-			<tag>out.Number = rules.latest();</tag>
-		</item>
-		
-		<item repeat="0-1">
-			<ruleref uri="#againstEntity"/>
-			<tag>out.Entity = rules.latest();</tag>
-			<tag>out.Action = "PLAY AGAINST";</tag>
-		</item>
+    <one-of>
+      <item repeat="0-1">Começa</item>
+      <item repeat="0-1">Quero</item>
+      <item repeat="0-1">Gostava de</item>
+      <item repeat="0-1">Por favor</item>
+    </one-of>
 
-	</rule>
+    <one-of>
+      <item repeat="0-1"> jogo </item>
+      <item repeat="0-1"> novo jogo </item>
+      <item repeat="0-1"> jogar</item>
+      <item repeat="0-1"> uma partida contra </item>
+    </one-of>
 
-	<rule id="againstEntity">
-		<one-of>
-			<item>
-				computador<tag>out="COMPUTER"</tag>
-			</item>
-			<item>
-				<item>
-					amigo<tag>out="FRIEND"</tag>
-				</item>
-			</item>
-		</one-of>
-	</rule>
-  
-	<rule id="PlayPiece">
-		<item repeat="0-1">
-			<item>
-				mover<tag>out.Action="MOVE"</tag>
-			</item>
-		</item>
+    <item repeat="0-1">
+      contra
+    </item>
 
-		<item repeat="0-1">
-			<ruleref uri="#Number"/>
-			<tag>out.NumberInitial = rules.latest();</tag>
-		</item>
 
-		<item repeat="0-1">
-			<ruleref uri="#Piece"/>
-			<tag> out.Entity = rules.latest(); </tag>
-		</item>
-		<item repeat="0-1">
-			<one-of>
-				<item> na </item>
-				<item> na posição </item>
-				<item> na casa </item>
-				<item> de </item>
-				<item> da </item>
-			</one-of>
-		</item>
-		<item repeat="0-1">
-			<one-of>
-				<item>
-					<ruleref uri="#Position"/>
-					<tag> out.PositionInitial = rules.latest(); </tag>
-				</item>
-				<item>
-					<ruleref uri="#Direction"/>
-					<tag> out.PositionInitial = rules.latest(); </tag>
-				</item>
-			</one-of>
-		</item>
-		<item repeat="0-1">
-			<one-of>
-				<item> para </item>
-				<item> em  </item>
-			</one-of>
-		</item>
-		<item repeat="0-1">
-			<ruleref uri="#Number"/>
-			<tag>out.NumberFinal = rules.latest();</tag>
-		</item>
-		<item repeat="0-1">
-			<one-of>
-				<item> na </item>
-				<item> na posição </item>
-				<item> na casa </item>
-				<item> de </item>
-				<item> da </item>
-			</one-of>
-		</item>
-		<item repeat="0-1">
-			<one-of>
-				<item>
-					<ruleref uri="#Position"/>
-					<tag> out.PositionFinal = rules.latest(); </tag>
-				</item>
-				<item>
-					<ruleref uri="#Direction"/>
-					<tag> out.PositionFinal = rules.latest(); </tag>
-				</item>
-			</one-of>
-		</item>
-	</rule>
+    <item repeat="0-1">
+      <ruleref uri="#Number"/>
+      <tag>out.Number = rules.latest();</tag>
+    </item>
+
+    <item repeat="0-1">
+      <ruleref uri="#againstEntity"/>
+      <tag>out.Entity = rules.latest();</tag>
+      <tag>out.Action = "PLAY AGAINST";</tag>
+    </item>
+
+  </rule>
+
+  <rule id="againstEntity">
+    <one-of>
+      <item>
+        computador<tag>out="COMPUTER"</tag>
+      </item>
+      <item>
+        <item>
+          amigo<tag>out="FRIEND"</tag>
+        </item>
+      </item>
+    </one-of>
+  </rule>
+
+  <rule id="PlayPiece">
+    <item repeat="0-1">
+      <item>
+        mover<tag>out.Action="MOVE"</tag>
+      </item>
+    </item>
+
+    <item repeat="0-1">
+      <ruleref uri="#Number"/>
+      <tag>out.NumberInitial = rules.latest();</tag>
+    </item>
+
+    <item repeat="0-1">
+      <ruleref uri="#Piece"/>
+      <tag> out.Entity = rules.latest(); </tag>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> na </item>
+        <item> na posição </item>
+        <item> na casa </item>
+        <item> de </item>
+        <item> da </item>
+      </one-of>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item>
+          <ruleref uri="#Position"/>
+          <tag> out.PositionInitial = rules.latest(); </tag>
+        </item>
+        <item>
+          <ruleref uri="#Direction"/>
+          <tag> out.PositionInitial = rules.latest(); </tag>
+        </item>
+      </one-of>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> para </item>
+        <item> em  </item>
+      </one-of>
+    </item>
+    <item repeat="0-1">
+      <ruleref uri="#Number"/>
+      <tag>out.NumberFinal = rules.latest();</tag>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> na </item>
+        <item> na posição </item>
+        <item> na casa </item>
+        <item> de </item>
+        <item> da </item>
+      </one-of>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item>
+          <ruleref uri="#Position"/>
+          <tag> out.PositionFinal = rules.latest(); </tag>
+        </item>
+        <item>
+          <ruleref uri="#Direction"/>
+          <tag> out.PositionFinal = rules.latest(); </tag>
+        </item>
+      </one-of>
+    </item>
+  </rule>
 
   <rule id="Capture">
-	  <item repeat="0-1">
-		  <one-of>
-			  <item> Capturar </item>
-			  <item> Captura </item>
-		  </one-of>
-		  <tag>out.Action="CAPTURE"</tag>
-	  </item>
-      <item repeat="0-1">
-        <ruleref uri="#Number"/>
-        <tag>out.NumberFinal = rules.latest();</tag>
-      </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> Capturar </item>
+        <item> Captura </item>
+      </one-of>
+      <tag>out.Action="CAPTURE"</tag>
+    </item>
+    <item repeat="0-1">
+      <ruleref uri="#Number"/>
+      <tag>out.NumberFinal = rules.latest();</tag>
+    </item>
 
-      <item repeat="0-1">
-        <ruleref uri="#Piece"/>
-        <tag> out.Target = rules.latest(); </tag>
-      </item>
-      <item repeat="0-1">
-        <one-of>
-          <item> na </item>
-          <item> na posição </item>
-          <item> na casa </item>
-          <item> de </item>
-          <item> da </item>
-        </one-of>
-      </item>
-      <item repeat="0-1">
-        <one-of>
-          <item>
-            <ruleref uri="#Position"/>
-            <tag> out.PositionFinal = rules.latest(); </tag>
-          </item>
-          <item>
-            <ruleref uri="#Direction"/>
-            <tag> out.PositionFinal = rules.latest(); </tag>
-          </item>
-        </one-of>
-      </item>
+    <item repeat="0-1">
+      <ruleref uri="#Piece"/>
+      <tag> out.Target = rules.latest(); </tag>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> na </item>
+        <item> na posição </item>
+        <item> na casa </item>
+        <item> de </item>
+        <item> da </item>
+      </one-of>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item>
+          <ruleref uri="#Position"/>
+          <tag> out.PositionFinal = rules.latest(); </tag>
+        </item>
+        <item>
+          <ruleref uri="#Direction"/>
+          <tag> out.PositionFinal = rules.latest(); </tag>
+        </item>
+      </one-of>
+    </item>
     <item repeat="0-1">
       com
     </item>
-     <item repeat="0-1">
-        <ruleref uri="#Number"/>
-        <tag>out.NumberInitial = rules.latest();</tag>
-      </item>
+    <item repeat="0-1">
+      <ruleref uri="#Number"/>
+      <tag>out.NumberInitial = rules.latest();</tag>
+    </item>
 
-      <item repeat="0-1">
-        <ruleref uri="#Piece"/>
-        <tag> out.Entity = rules.latest(); </tag>
-      </item>
-      <item repeat="0-1">
-        <one-of>
-          <item> na </item>
-          <item> na posição </item>
-          <item> na casa </item>
-          <item> de </item>
-          <item> da </item>
-        </one-of>
-      </item>
-      <item repeat="0-1">
-        <one-of>
-          <item>
-            <ruleref uri="#Position"/>
-            <tag> out.PositionInitial = rules.latest(); </tag>
-          </item>
-          <item>
-            <ruleref uri="#Direction"/>
-            <tag> out.PositionInitial = rules.latest(); </tag>
-          </item>
-        </one-of>
-      </item>
+    <item repeat="0-1">
+      <ruleref uri="#Piece"/>
+      <tag> out.Entity = rules.latest(); </tag>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item> na </item>
+        <item> na posição </item>
+        <item> na casa </item>
+        <item> de </item>
+        <item> da </item>
+      </one-of>
+    </item>
+    <item repeat="0-1">
+      <one-of>
+        <item>
+          <ruleref uri="#Position"/>
+          <tag> out.PositionInitial = rules.latest(); </tag>
+        </item>
+        <item>
+          <ruleref uri="#Direction"/>
+          <tag> out.PositionInitial = rules.latest(); </tag>
+        </item>
+      </one-of>
+    </item>
   </rule>
 
   <rule id="SpecialMoves">
@@ -353,7 +353,7 @@
         <item>
           Fazer
         </item>
-        <item> 
+        <item>
           Faz
         </item>
       </one-of>
@@ -366,276 +366,262 @@
         Roque <tag> out.SpecialMove="ROQUE"</tag>
       </item>
     </one-of>
-    <tag>out.Action="SPECIAL" </tag> 
-    
-    
+    <tag>out.Action="SPECIAL" </tag>
+
+
   </rule>
 
-  <rule id="ControlBot">
-    <item repeat="0-1"> Por favor </item>
+  <rule id="Piece">
+    <example> cavalo </example>
+    <example> bispo </example>
+    <example> peão </example>
     <one-of>
-			<item>
-				silêncio<tag>out="SILENT"</tag>
-			</item>
       <item>
-        narrar<tag>out="NARRATE"</tag>
+        <ruleref uri="#Entity"/>
+        <tag> out=rules.latest(); </tag>
       </item>
     </one-of>
-    <item repeat="0-1"> Por favor </item>
+  </rule>
+
+  <rule id="Entity">
+    <one-of>
+      <item>
+        rei<tag>out="KING"</tag>
+      </item>
+      <item>
+        rainha<tag>out="QUEEN"</tag>
+      </item>
+      <item>
+        torre<tag>out="ROOK"</tag>
+      </item>
+      <item>
+        bispo<tag>out="BISHOP"</tag>
+      </item>
+      <item>
+        cavalo<tag>out="KNIGHT"</tag>
+      </item>
+      <item>
+        peão<tag>out="PAWN"</tag>
+      </item>
+    </one-of>
+  </rule>
+
+  <rule id="Action">
+    <one-of>
+      <item>
+        mover<tag>out="MOVE"</tag>
+      </item>
+      <item>
+        fazer<tag>out="DO"</tag>
+      </item>
+      <item>
+        recuar<tag>out="BACKOFF"</tag>
+      </item>
+
+
+    </one-of>
+  </rule>
+
+
+
+  <rule id="Position">
+    <example> b3 </example>
+    <example> a2 </example>
+    <item>
+      <ruleref uri="#horizontal_board"/>
+      <tag> teste=rules.latest(); </tag>
+    </item>
+    <item>
+      <ruleref uri="#vertical_board"/>
+      <tag> out=teste+rules.latest(); </tag>
+    </item>
+  </rule>
+
+  <rule id="horizontal_board">
+    <one-of>
+      <item>
+        a<tag>out="A"</tag>
+      </item>
+      <item>
+        b<tag>out="B"</tag>
+      </item>
+      <item>
+        c<tag>out="C"</tag>
+      </item>
+      <item>
+        d<tag>out="D"</tag>
+      </item>
+      <item>
+        e<tag>out="E"</tag>
+      </item>
+      <item>
+        f<tag>out="F"</tag>
+      </item>
+      <item>
+        g<tag>out="G"</tag>
+      </item>
+      <item>
+        h<tag>out="H"</tag>
+      </item>
+    </one-of>
+  </rule>
+  <rule id="vertical_board">
+    <one-of>
+      <item>
+        1<tag>out="1"</tag>
+      </item>
+      <item>
+        2<tag>out="2"</tag>
+      </item>
+      <item>
+        3<tag>out="3"</tag>
+      </item>
+      <item>
+        4<tag>out="4"</tag>
+      </item>
+      <item>
+        5<tag>out="5"</tag>
+      </item>
+      <item>
+        6<tag>out="6"</tag>
+      </item>
+      <item>
+        7<tag>out="7"</tag>
+      </item>
+      <item>
+        8<tag>out="8"</tag>
+      </item>
+    </one-of>
+  </rule>
+
+  <rule id="Direction">
+    <one-of>
+      <item>
+        direita<tag>out="RIGHT"</tag>
+      </item>
+      <item>
+        esquerda<tag>out="LEFT"</tag>
+      </item>
+      <item>
+        frente<tag>out="FRONT"</tag>
+      </item>
+      <item>
+        atrás<tag>out="BACK"</tag>
+      </item>
+    </one-of>
+  </rule>
+
+
+  <rule id="Number">
+    <one-of>
+      <item>
+        <tag>out = "";</tag>
+        <item repeat="0-1">
+          <ruleref uri="#Dozens"/>
+          <tag>out += rules.latest().substring(0,1);</tag>
+        </item>
+        <ruleref uri="#Unities"/>
+        <tag>out += rules.latest();</tag>
+      </item>
+      <item>
+        <one-of>
+          <item>
+            última
+          </item>
+          <item>
+            último
+          </item>
+        </one-of>
+        <tag>out="-1"</tag>
+      </item>
+      <item>
+        <one-of>
+          <item>
+            penúltima
+          </item>
+          <item>
+            penúltimo
+          </item>
+        </one-of>
+        <tag>out="-2"</tag>
+      </item>
+      <item>
+        <one-of>
+          <item>
+            antepenúltima
+          </item>
+          <item>
+            antepenúltimo
+          </item>
+        </one-of>
+        <tag>out="-3"</tag>
+      </item>
+    </one-of>
+
 
   </rule>
 
-	<rule id="Piece">
-		<example> cavalo </example>
-		<example> bispo </example>
-		<example> peão </example>
-		<one-of>
-			<item>
-				<ruleref uri="#Entity"/>
-				<tag> out=rules.latest(); </tag>
-			</item>
-		</one-of>
-	</rule>
+  <rule id="Unities">
+    <one-of>
+      <item>
+        1º<tag>out="1"</tag>
+      </item>
+      <item>
+        2º<tag>out="2"</tag>
+      </item>
+      <item>
+        3º<tag>out="3"</tag>
+      </item>
+      <item>
+        4º<tag>out="4"</tag>
+      </item>
+      <item>
+        5º<tag>out="5"</tag>
+      </item>
+      <item>
+        6º<tag>out="6"</tag>
+      </item>
+      <item>
+        7º<tag>out="7"</tag>
+      </item>
+      <item>
+        8º<tag>out="8"</tag>
+      </item>
+      <item>
+        9º<tag>out="9"</tag>
+      </item>
+    </one-of>
+  </rule>
 
-	<rule id="Entity">
-		<one-of>
-			<item>
-				rei<tag>out="KING"</tag>
-			</item>
-			<item>
-				rainha<tag>out="QUEEN"</tag>
-			</item>
-			<item>
-				torre<tag>out="ROOK"</tag>
-			</item>
-			<item>
-				bispo<tag>out="BISHOP"</tag>
-			</item>
-			<item>
-				cavalo<tag>out="KNIGHT"</tag>
-			</item>
-			<item>
-				peão<tag>out="PAWN"</tag>
-			</item>
-		</one-of>
-	</rule>
-
-	<rule id="Action">
-		<one-of>
-			<item>
-				mover<tag>out="MOVE"</tag>
-			</item>
-			<item>
-				fazer<tag>out="DO"</tag>
-			</item>
-			<item>
-				recuar<tag>out="BACKOFF"</tag>
-			</item>
-      
-      
-		</one-of>
-	</rule>
-  
-  
-
-	<rule id="Position">
-		<example> b3 </example>
-		<example> a2 </example>
-		<item>
-			<ruleref uri="#horizontal_board"/>
-			<tag> teste=rules.latest(); </tag>
-		</item>
-		<item>
-			<ruleref uri="#vertical_board"/>
-			<tag> out=teste+rules.latest(); </tag>
-		</item>
-	</rule>
-
-	<rule id="horizontal_board">
-		<one-of>
-			<item>
-				a<tag>out="A"</tag>
-			</item>
-			<item>
-				b<tag>out="B"</tag>
-			</item>
-			<item>
-				c<tag>out="C"</tag>
-			</item>
-			<item>
-				d<tag>out="D"</tag>
-			</item>
-			<item>
-				e<tag>out="E"</tag>
-			</item>
-			<item>
-				f<tag>out="F"</tag>
-			</item>
-			<item>
-				g<tag>out="G"</tag>
-			</item>
-			<item>
-				h<tag>out="H"</tag>
-			</item>
-		</one-of>
-	</rule>
-	<rule id="vertical_board">
-		<one-of>
-			<item>
-				1<tag>out="1"</tag>
-			</item>
-			<item>
-				2<tag>out="2"</tag>
-			</item>
-			<item>
-				3<tag>out="3"</tag>
-			</item>
-			<item>
-				4<tag>out="4"</tag>
-			</item>
-			<item>
-				5<tag>out="5"</tag>
-			</item>
-			<item>
-				6<tag>out="6"</tag>
-			</item>
-			<item>
-				7<tag>out="7"</tag>
-			</item>
-			<item>
-				8<tag>out="8"</tag>
-			</item>
-		</one-of>
-	</rule>
-
-	<rule id="Direction">
-		<one-of>
-			<item>
-				direita<tag>out="RIGHT"</tag>
-			</item>
-			<item>
-				esquerda<tag>out="LEFT"</tag>
-			</item>
-			<item>
-				frente<tag>out="FRONT"</tag>
-			</item>
-			<item>
-				atrás<tag>out="BACK"</tag>
-			</item>
-		</one-of>
-	</rule>
-
-
-	<rule id="Number">
-		<one-of>
-			<item>
-				<tag>out = "";</tag>
-				<item repeat="0-1">
-					<ruleref uri="#Dozens"/>
-					<tag>out += rules.latest().substring(0,1);</tag>
-				</item>
-				<ruleref uri="#Unities"/>
-				<tag>out += rules.latest();</tag>
-			</item>
-			<item>
-				<one-of>
-					<item>
-						última
-					</item>
-					<item>
-						último
-					</item>
-				</one-of>
-				<tag>out="-1"</tag>
-			</item>
-			<item>
-				<one-of>
-					<item>
-						penúltima
-					</item>
-					<item>
-						penúltimo
-					</item>
-				</one-of>
-				<tag>out="-2"</tag>
-			</item>
-			<item>
-				<one-of>
-					<item>
-						antepenúltima
-					</item>
-					<item>
-						antepenúltimo
-					</item>
-				</one-of>
-				<tag>out="-3"</tag>
-			</item>
-		</one-of>
-		
-
-	</rule>
-
-	<rule id="Unities">
-		<one-of>
-			<item>
-				1º<tag>out="1"</tag>
-			</item>
-			<item>
-				2º<tag>out="2"</tag>
-			</item>
-			<item>
-				3º<tag>out="3"</tag>
-			</item>
-			<item>
-				4º<tag>out="4"</tag>
-			</item>
-			<item>
-				5º<tag>out="5"</tag>
-			</item>
-			<item>
-				6º<tag>out="6"</tag>
-			</item>
-			<item>
-				7º<tag>out="7"</tag>
-			</item>
-			<item>
-				8º<tag>out="8"</tag>
-			</item>
-			<item>
-				9º<tag>out="9"</tag>
-			</item>
-		</one-of>
-	</rule>
-	
-	<rule id="Dozens">
-		<one-of>
-			<item>
-				10º<tag>out="10"</tag>
-			</item>
-			<item>
-				20º<tag>out="20"</tag>
-			</item>
-			<item>
-				30º<tag>out="30"</tag>
-			</item>
-			<item>
-				40º<tag>out="40"</tag>
-			</item>
-			<item>
-				50º<tag>out="50"</tag>
-			</item>
-			<item>
-				60º<tag>out="60"</tag>
-			</item>
-			<item>
-				70º<tag>out="70"</tag>
-			</item>
-			<item>
-				80º<tag>out="80"</tag>
-			</item>
-			<item>
-				90º<tag>out="90"</tag>
-			</item>
-		</one-of>
-	</rule>
+  <rule id="Dozens">
+    <one-of>
+      <item>
+        10º<tag>out="10"</tag>
+      </item>
+      <item>
+        20º<tag>out="20"</tag>
+      </item>
+      <item>
+        30º<tag>out="30"</tag>
+      </item>
+      <item>
+        40º<tag>out="40"</tag>
+      </item>
+      <item>
+        50º<tag>out="50"</tag>
+      </item>
+      <item>
+        60º<tag>out="60"</tag>
+      </item>
+      <item>
+        70º<tag>out="70"</tag>
+      </item>
+      <item>
+        80º<tag>out="80"</tag>
+      </item>
+      <item>
+        90º<tag>out="90"</tag>
+      </item>
+    </one-of>
+  </rule>
 </grammar>

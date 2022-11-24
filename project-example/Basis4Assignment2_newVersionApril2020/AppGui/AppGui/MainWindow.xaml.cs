@@ -71,12 +71,12 @@ namespace AppGui
         static List<string> FRIEND_CHOOSE = new List<string>() {
             "Escolha um amigo dentre a lista de amigos"
         };
-        static List<string> LOADING = new List<string>() { 
-            "Estamos carregando. Por favor, aguarde.", 
-            "Por favor, espere um pouco enquanto carregamos as configurações." 
+        static List<string> LOADING = new List<string>() {
+            "Estamos a carregar o jogo. Por favor, aguarde.",
+            "Por favor, espere um pouco enquanto configuaramos o jogo."
         };
         static List<string> REPEAT_PHRASE = new List<string>() {
-            "Então poderia repetir a frase novamnte?"
+            "Então poderia repetir a frase novamente?"
         };
         static List<string> GAME_STARTED = new List<string>() {
             "Jogo iniciado! Tenha um bom jogo!"
@@ -90,11 +90,11 @@ namespace AppGui
         static List<string> LETS_PLAY = new List<string>() {
             "Contra quem quer jogar? Computador ou amigos?"
         };
-        
+
         static List<string> GAME_MUTED_ALREADY = new List<string>() {
             "O jogo já esta sem som."
         };
-        static List<string> GAME_WITH_SOUND_ALREADY = new List<string>() { 
+        static List<string> GAME_WITH_SOUND_ALREADY = new List<string>() {
             "O jogo já está com som."
         };
 
@@ -104,9 +104,9 @@ namespace AppGui
         static List<string> NO_KNOWN_ACTION_ERROR = new List<string>() {
             "Não consegui identificar a ação, poderia indicá-la novamente?"
         };
-        static List<string> WRONG_MOVE_ERROR = new List<string>() { 
+        static List<string> WRONG_MOVE_ERROR = new List<string>() {
             "Possibilidade de movimento não existente, poderia indicá-lo novamente?"
-            , "Não existe essa possibilidade de movimento, poderia indicá-lo novamente?" 
+            , "Não existe essa possibilidade de movimento, poderia indicá-lo novamente?"
         };
         static List<string> AMBIGUOS_MOVEMENT = new List<string>() {
             "Existe mais de um movimento possível para essa peça, poderia indicar o destino?"
@@ -115,19 +115,20 @@ namespace AppGui
             "Existe mais de uma peça com essa descrição, poderia indicar a peça?"
         };
         static List<string> FRIEND_CHOOSE_COUNT_ERROR = new List<string>() {
-            "Amigo não encontrado, por favor, tente novamente"
+            "Amigo não encontrado, por favor, tente novamente", "Não conseguimos encontrar o seu amigo, indique em que posição da tabela este se encontra."
         };
-        static List<string> ROQUE_NOT_POSSIBLE = new List<string>() { 
-            "Não é possível realizar o movimento 'roque' no momento." 
+        static List<string> ROQUE_NOT_POSSIBLE = new List<string>() {
+            "Não é possível realizar o movimento 'roque' no momento." ,
+            "O movimento 'roque' não é possível."
         };
         static List<string> WRONG_PAGE_ERROR = new List<string>() {
-            "Você não está na página correta para realizar essa ação. Por favor, tente mudar de página e tente novamente. ",
-            "Infelizmente a ação sugerida não pode ser aplicada nesta página. Por favor, tente mudar de página e tente novamente. "
+            "Não está na página correta para realizar essa ação. Por favor, tente mudar de página e tente novamente. ",
+            "Infelizmente a ação sugerida não pode ser aplicada nesta página. Por favor, tente mudar de página e tente novamente. ",
         };
 
         static string CONFIRM_CHOICE = "Você deseja";
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
-        
+
         // ------------------------ CONFIRMATIONS
 
 
@@ -137,7 +138,8 @@ namespace AppGui
         Dictionary<string, string> semanticDict = new Dictionary<string, string>()
         {
             ["MOVE"] = "mover",
-            ["CAPTURE"] = "capturar",            ["PLAY AGAINST"] = "jogar contra",
+            ["CAPTURE"] = "capturar",
+            ["PLAY AGAINST"] = "jogar contra",
             ["END"] = "finalizar a partida",
             ["CAPTURE"] = "capturar",
             ["GO BACK"] = "voltar atrás",
@@ -264,7 +266,8 @@ namespace AppGui
                         return;
                     }
                     Console.WriteLine("GIVE UP");
-                    if (!ignoreConfidence) {
+                    if (!ignoreConfidence)
+                    {
                         isConfident = generateConfidence(confidence, dict, forceConfidence: true);
                     }
                     if (isConfident)
@@ -272,7 +275,7 @@ namespace AppGui
                         giveUp();
                     }
                     break;
-                    
+
                 case "MOVE":
                     if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
                     {
@@ -333,7 +336,7 @@ namespace AppGui
                         perfomRoque();
                     }
                     break;
-                    
+
                 case "ANSWER":
                     if (!context.ContainsKey(WAITING_CONFIRM) || !bool.Parse(context[WAITING_CONFIRM])) return;
                     bool answer = entity == "YES";
@@ -362,7 +365,7 @@ namespace AppGui
                     );
 
                     Console.WriteLine("Possible pieces: " + possiblePieces.Count);
-                    
+
                     foreach (var piece in possiblePieces)
                     {
                         Console.WriteLine(piece.GetAttribute("class"));
@@ -383,7 +386,7 @@ namespace AppGui
 
                     break;
 
-                case "GO BACK": 
+                case "GO BACK":
                     Console.WriteLine("GO BACK");
                     if (!ignoreConfidence)
                     {
@@ -414,20 +417,32 @@ namespace AppGui
         {
             Console.WriteLine("Muting...");
             IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
+            Console.WriteLine("Mutingx2...");
+            Actions action = new Actions(driver);
+            action.MoveToElement(settings_mute).Click().Perform();
+            System.Threading.Thread.Sleep(WAIT_TIME);
 
-            settings_mute.Click();
             bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(11) > div:nth-child(2) > label:nth-child(2) > div:nth-child(1)")).Selected;
             Console.WriteLine(mute);
 
-            if (mute == true)
+            if (mute == false)
             {
-                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
-                buttonSound_mute.Click();
-                IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
-                save_mute.Click();
-                Console.WriteLine("aha");
-                Console.WriteLine(mute);
+                Actions actionSound = new Actions(driver);
 
+                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings - field - row:nth - child(9) > div:nth - child(2) > label:nth - child(2)"));
+                actionSound.MoveToElement(buttonSound_mute).Click().Perform();
+
+                Console.WriteLine(mute);
+                System.Threading.Thread.Sleep(WAIT_TIME);
+
+                Actions actionSave = new Actions(driver);
+                Console.WriteLine("~weppaa ir ao botao");
+                IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
+                Console.WriteLine("passei no botao");
+                actionSave.MoveToElement(save_mute).Click().Perform();
+                Console.WriteLine("cliquei");
+                Console.WriteLine(mute);
+                Console.WriteLine("aha");
             }
             else
             {
@@ -438,18 +453,32 @@ namespace AppGui
         {
             Console.WriteLine("A por som...");
             IWebElement settings_mute = driver.FindElement(By.CssSelector("a.small-controls-icon:nth-child(3)"));
-            settings_mute.Click();
-            bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(11) > div:nth-child(2) > label:nth-child(2) > div:nth-child(1)")).Selected;
+            System.Threading.Thread.Sleep(WAIT_TIME);
 
+            Console.WriteLine("passei no settings on");
+            Actions action = new Actions(driver);
+            action.MoveToElement(settings_mute).Click().Perform();
+
+            Console.WriteLine("e aqui tb");
+
+            bool mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)")).Selected;
             Console.WriteLine(mute);
             if (mute == false)
             {
-                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
-                buttonSound_mute.Click();
+                Actions actionSound = new Actions(driver);
+                IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings - field - row:nth - child(9) > div:nth - child(2) > label:nth - child(2)"));
+                actionSound.MoveToElement(buttonSound_mute).Click().Perform();
                 Console.WriteLine("conseguir ir ao botao");
+                System.Threading.Thread.Sleep(WAIT_TIME);
+
+                Console.WriteLine(mute);
+
+                Actions actionSave = new Actions(driver);
+
                 IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
-                save_mute.Click();
-                // Get all elements with a given ClassName
+                Console.WriteLine("passei no botao");
+                actionSave.MoveToElement(save_mute).Click().Perform();
+                Console.WriteLine("cliquei");
                 Console.WriteLine("aha");
                 Console.WriteLine(mute);
 
@@ -460,12 +489,13 @@ namespace AppGui
             }
         }
 
-        public List<IWebElement> getPossiblePiecesCapture(String pieceName = null, 
+
+        public List<IWebElement> getPossiblePiecesCapture(String pieceName = null,
             String from = null, int number = 1)
         {
 
             var pieces = getPossiblePieces(pieceName: pieceName, from: from, number: number);
-            
+
 
 
             Console.WriteLine("Possible pieces func: " + pieces.Count);
@@ -475,15 +505,17 @@ namespace AppGui
                 Console.WriteLine(piece.GetAttribute("class"));
             }
 
-            if (pieces.Count == 0) {
+            if (pieces.Count == 0)
+            {
                 // pieces = every player is a possible piece
                 pieces = FindChildrenByClass(board, pieceColor);
             }
-            
+
             return pieces;
         }
 
-        public void capture(List<IWebElement> pieces, string to = null, int number = -1, string targetName = "") {
+        public void capture(List<IWebElement> pieces, string to = null, int number = -1, string targetName = "")
+        {
             List<IWebElement> correctPieces = new List<IWebElement>();
             List<List<IWebElement>> possibleMovesList = new List<List<IWebElement>>();
 
@@ -510,7 +542,8 @@ namespace AppGui
                 context["pieceName"] = pieceName;
                 var possibleMoves = possibleMovesList[0];
                 Console.WriteLine("Possible moves: " + possibleMoves.Count);
-                foreach (var possibleMove in possibleMoves) { 
+                foreach (var possibleMove in possibleMoves)
+                {
                     Console.WriteLine(possibleMove.GetAttribute("class"));
                 }
 
@@ -542,17 +575,18 @@ namespace AppGui
             }
         }
 
-        public List<IWebElement> getTargets(IWebElement piece, 
-            string to = null, int number = -1, string targetName="") { 
+        public List<IWebElement> getTargets(IWebElement piece,
+            string to = null, int number = -1, string targetName = "")
+        {
 
 
-            
+
             return null;
         }
 
         // ------------------------------ Rate confidence
 
-        public bool generateConfidence(float confidence, Dictionary<string,string> recognized, bool forceConfidence = false)
+        public bool generateConfidence(float confidence, Dictionary<string, string> recognized, bool forceConfidence = false)
         {
             bool isConfident = true;
             context[WAITING_CONFIRM] = "false";
@@ -571,7 +605,7 @@ namespace AppGui
                     string key = kvp.Key;
                     string value = kvp.Value;
                     context[key] = value;
-                    
+
                 }
 
                 foreach (KeyValuePair<string, string> kvp in context)
@@ -580,7 +614,8 @@ namespace AppGui
                 }
 
 
-                switch (context["Action"]) {
+                switch (context["Action"])
+                {
 
                     case "MOVE":
                         phrase += getFromSemanticDict(context["Entity"]);
@@ -610,7 +645,8 @@ namespace AppGui
             return isConfident;
         }
 
-        public string getFromSemanticDict(string key, string defaultOutput = "") {
+        public string getFromSemanticDict(string key, string defaultOutput = "")
+        {
             if (semanticDict.ContainsKey(key))
             {
                 return " " + semanticDict[key];
@@ -618,8 +654,10 @@ namespace AppGui
             return defaultOutput;
         }
 
-        public string getPhraseFromContext(string key, string extra = "") {
-            if (context.ContainsKey(key)) {
+        public string getPhraseFromContext(string key, string extra = "")
+        {
+            if (context.ContainsKey(key))
+            {
                 return " " + context[key] + extra;
             }
             return "";
@@ -627,13 +665,14 @@ namespace AppGui
 
         // ------------------------------ START GAME
 
-        public void startGame() {
+        public void startGame()
+        {
             Console.WriteLine("Start Game");
             IWebElement button;
             if (driver.Url == COMPUTER_URL)
             {
-               button = driver.FindElement(By.XPath(COMPUTER_START_BUTTON));
-            
+                button = driver.FindElement(By.XPath(COMPUTER_START_BUTTON));
+
             }
             else if (driver.Url.Contains(VS_FRIENDS_URL))
             {
@@ -655,7 +694,8 @@ namespace AppGui
                 sendMessage(GAME_STARTED);
 
             }
-            else if (driver.Url.Contains(VS_FRIENDS_URL)) {
+            else if (driver.Url.Contains(VS_FRIENDS_URL))
+            {
                 System.Threading.Thread.Sleep(WAIT_TIME);
                 try
                 {
@@ -668,7 +708,7 @@ namespace AppGui
                 }
                 catch (NoSuchElementException)
                 {
-                    
+
                 }
 
 
@@ -684,7 +724,8 @@ namespace AppGui
 
         // ------------------------------ GIVE UP
 
-        public void giveUp() {
+        public void giveUp()
+        {
             Console.WriteLine("Give Up sussy");
             IWebElement button = driver.FindElement(By.XPath(GIVE_UP_BUTTON));
             Console.WriteLine("button: " + button);
@@ -697,12 +738,13 @@ namespace AppGui
 
         // ------------------------------ PLAY AGAINS PC OR HUMAN
 
-        public void playAgainst(int friendID) {
+        public void playAgainst(int friendID)
+        {
             /*
              * @param entity: "1", "2", etc...
              */
             if (friendID == -1 || driver.Url != FRIENDS_URL) return;
-            
+
             IWebElement friendsList = driver.FindElement(By.XPath(FRIENDS_LIST));
             List<IWebElement> friends;
 
@@ -710,13 +752,15 @@ namespace AppGui
             {
                 friends = FindChildrenByClass(friendsList, "friends-list-item");
             }
-            catch (StaleElementReferenceException e) {
+            catch (StaleElementReferenceException e)
+            {
                 System.Threading.Thread.Sleep(WAIT_TIME);
                 friends = FindChildrenByClass(friendsList, "friends-list-item");
             }
-            
 
-            if (friendID > friends.Count) {
+
+            if (friendID > friends.Count)
+            {
                 sendMessage(FRIEND_CHOOSE_COUNT_ERROR);
                 return;
             }
@@ -739,8 +783,9 @@ namespace AppGui
         public void opponentType(String entity, int friendID)
         {
             if (entity == null) return;
-            
-            if (entity == "COMPUTER") {
+
+            if (entity == "COMPUTER")
+            {
                 redirect(COMPUTER_URL, hasBoard: true, hasAd: true);
             }
             else if (entity == "FRIEND")
@@ -752,13 +797,15 @@ namespace AppGui
                 }
             }
         }
-        
-        public void redirect(String URL, bool hasBoard = false, bool hasAd = false, string boardName = null) {
+
+        public void redirect(String URL, bool hasBoard = false, bool hasAd = false, string boardName = null)
+        {
             driver.Navigate().GoToUrl(URL);
-            
+
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
             System.Threading.Thread.Sleep(WAIT_TIME);
-            if (hasAd) {
+            if (hasAd)
+            {
                 try
                 {
                     IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
@@ -773,7 +820,8 @@ namespace AppGui
                 }
             }
 
-            if (hasBoard) {
+            if (hasBoard)
+            {
                 if (boardName == null)
                 {
                     boardName = BOARD;
@@ -788,20 +836,22 @@ namespace AppGui
 
         // ------------------------------ MOVEMENT
 
-        public void movePieces(List<IWebElement> pieces, string to = null, int number = -1) { //, string direction = null) {
+        public void movePieces(List<IWebElement> pieces, string to = null, int number = -1)
+        { //, string direction = null) {
 
             List<IWebElement> correctPieces = new List<IWebElement>();
             List<List<IWebElement>> possibleMovesList = new List<List<IWebElement>>();
-            
+
             foreach (IWebElement piece in pieces)
             {
                 var possibleMoves = findPossiblePositions(piece, to, number);//, direction);
-                if (possibleMoves.Count >= 1) {
+                if (possibleMoves.Count >= 1)
+                {
                     correctPieces.Add(piece);
                     possibleMovesList.Add(possibleMoves);
                 }
             }
-            
+
             Console.WriteLine("Correct pieces: " + correctPieces.Count);
 
             if (correctPieces.Count == 1)
@@ -838,13 +888,14 @@ namespace AppGui
             }
 
         }
-        public List<IWebElement> findPossiblePositions(IWebElement piece, string to=null, int number = -1, 
-            string target = "", bool isCapture = false) { //, string direction=null) {
+        public List<IWebElement> findPossiblePositions(IWebElement piece, string to = null, int number = -1,
+            string target = "", bool isCapture = false)
+        { //, string direction=null) {
             piece.Click();
             string hint = isCapture ? "capture-hint" : "hint";
 
             string enemyColor = playerColor == "white" ? "piece b" : "piece w";
-            
+
 
             // Filter by To
             if (to != null && to.Length <= 2)
@@ -864,8 +915,9 @@ namespace AppGui
                 string enemyPiece = target == "KNIGHT" ? enemyColor + "n" : enemyColor + target.ToLower()[0];
                 var newPossiblePositions = new List<IWebElement>();
                 var enemyPieces = FindChildrenByClass(board, enemyPiece);
-                
-                foreach (var enPiece in enemyPieces) {
+
+                foreach (var enPiece in enemyPieces)
+                {
                     var enemyPos = enPiece.GetAttribute("class").Substring(enPiece.GetAttribute("class").LastIndexOf(" ") + 1);
                     foreach (var possiblePosition in possiblePositions)
                     {
@@ -876,8 +928,8 @@ namespace AppGui
                         }
                     }
                 }
-                
-                
+
+
                 possiblePositions = newPossiblePositions;
                 Console.WriteLine("possiblePositions target: " + possiblePositions.Count);
                 foreach (var possiblePosition in possiblePositions)
@@ -911,7 +963,7 @@ namespace AppGui
                 var usedPos = new List<int>();
                 var newPossiblePieces = new List<List<IWebElement>>();
                 number--;
-                
+
                 foreach (IWebElement child in possiblePositionsOnDirection)
                 {
                     int counter = newPossiblePieces.Count;
@@ -1003,13 +1055,14 @@ namespace AppGui
             return possiblePositions;
         }
 
-        public void performMove(IWebElement position) {
+        public void performMove(IWebElement position)
+        {
             Actions action = new Actions(driver);
             action.MoveToElement(position).Click().Perform();
         }
 
-        public List<IWebElement> getPossiblePieces(String pieceName = null, String from = null, 
-            String to = null, int number=1)//, String direction = null)
+        public List<IWebElement> getPossiblePieces(String pieceName = null, String from = null,
+            String to = null, int number = 1)//, String direction = null)
         {
             /*
              * @parameter pieceName: name of the piece to move (KNIGHT, KING, etc)
@@ -1021,7 +1074,7 @@ namespace AppGui
              */
 
             from = getCurrentOrUpdate(from, "from");
-            pieceName = getCurrentOrUpdate(pieceName ,"pieceName");
+            pieceName = getCurrentOrUpdate(pieceName, "pieceName");
 
             // i have no idea what the piece can be
             if (pieceName == null && from == null)
@@ -1031,26 +1084,30 @@ namespace AppGui
 
             string piece;
 
-            if (from == null || from.Length > 2) { 
+            if (from == null || from.Length > 2)
+            {
                 piece = pieceName == "KNIGHT" ? pieceColor + "n" : pieceColor + pieceName.ToLower()[0];
 
             }
 
             // Exact location of piece
-            else {
+            else
+            {
                 piece = " square-" + getHorizontalNumber(from[0]) + from[1];
             }
 
             var possiblePieces = FindChildrenByClass(board, piece);
 
-            if (possiblePieces.Count <= 1) {
+            if (possiblePieces.Count <= 1)
+            {
                 return possiblePieces;
             }
-            
+
 
 
             // if there are more than one piece, filter by direction
-            if ((from == null || from.Length <= 2) && number == 1) {
+            if ((from == null || from.Length <= 2) && number == 1)
+            {
                 return possiblePieces;
             }
 
@@ -1071,14 +1128,16 @@ namespace AppGui
                 int counter = newPossiblePieces.Count;
 
                 if (number > 0 && counter > number) { break; }
-                
-                if (from == "LEFT" || from == "RIGHT") {
-                    
+
+                if (from == "LEFT" || from == "RIGHT")
+                {
+
                     if (usedPos.Contains(child.Location.X))
                     {
                         newPossiblePieces[counter - 1].Add(child);
                     }
-                    else {
+                    else
+                    {
                         newPossiblePieces.Add(new List<IWebElement>());
                         newPossiblePieces[counter].Add(child);
                         usedPos.Add(child.Location.X);
@@ -1106,13 +1165,13 @@ namespace AppGui
 
         }
 
-        public List<IWebElement> sortByDirection(List<IWebElement> list, string direction=null, bool reverse = false)
+        public List<IWebElement> sortByDirection(List<IWebElement> list, string direction = null, bool reverse = false)
         {
             if (direction == null)
             {
                 return list;
             }
-            
+
             if (direction == "LEFT" && !reverse || direction == "RIGHT" && reverse)
             {
                 Console.WriteLine("Sussy left");
@@ -1128,7 +1187,8 @@ namespace AppGui
                 }
             }
 
-            else if (direction == "RIGHT" && !reverse || direction == "LEFT" && reverse) {
+            else if (direction == "RIGHT" && !reverse || direction == "LEFT" && reverse)
+            {
                 list.Sort((o1, o2) =>
                 {
                     return o2.Location.X - o1.Location.X;
@@ -1150,8 +1210,8 @@ namespace AppGui
                     return o2.Location.Y - o1.Location.Y;
                 });
             }
-            
-            
+
+
             return list;
         }
 
@@ -1265,18 +1325,19 @@ namespace AppGui
             return (int)letter - 64;
         }
 
-        public string getPiecePosition(IWebElement piece) {
+        public string getPiecePosition(IWebElement piece)
+        {
             var pieceClass = piece.GetAttribute("class");
 
             return pieceClass.Substring(pieceClass.Length - 2);
         }
-        
+
 
         public bool isOnSamePositionInADirection(IWebElement element, IWebElement target, string direction)
         {
             var el = element.Location;
             var t = target.Location;
-            
+
 
             switch (direction)
             {
@@ -1297,13 +1358,15 @@ namespace AppGui
             }
         }
 
-        public bool isOnDirection(IWebElement element, IWebElement target, string direction) {
+        public bool isOnDirection(IWebElement element, IWebElement target, string direction)
+        {
 
             var el = element.Location;
             var t = target.Location;
 
-            switch (direction) {
-                
+            switch (direction)
+            {
+
                 case ("LEFT"):
                     return t.X < el.X;
 
@@ -1321,7 +1384,8 @@ namespace AppGui
             }
         }
 
-        public string getCurrentOrUpdate(string variable, string key, string defaultVal = null) {
+        public string getCurrentOrUpdate(string variable, string key, string defaultVal = null)
+        {
 
             if (variable == null)
             {
@@ -1333,15 +1397,18 @@ namespace AppGui
             return variable;
         }
 
-        public string getFromContext(string key, string defaultVal = null) {
-            if (context.ContainsKey(key)) {
+        public string getFromContext(string key, string defaultVal = null)
+        {
+            if (context.ContainsKey(key))
+            {
                 return context[key];
             }
 
             return defaultVal;
         }
-        
-        public void sendMessage(List<string> message) {
+
+        public void sendMessage(List<string> message)
+        {
             // select random from list message
             Random rnd = new Random();
             int index = rnd.Next(message.Count);
@@ -1391,7 +1458,8 @@ namespace AppGui
             return (counter == 2 && playerColor.Contains("white")) || (counter == 1 && playerColor.Contains("black"));
         }
 
-        public bool isCurrentPlayerByTable(IWebElement tab) {
+        public bool isCurrentPlayerByTable(IWebElement tab)
+        {
 
             List<IWebElement> moves = FindChildrenByClass(tab, "move");
             isCurrent = isCurrentPlayer((IWebElement)moves[moves.Count - 1], playerColor);
