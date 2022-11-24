@@ -137,7 +137,8 @@ namespace AppGui
         Dictionary<string, string> semanticDict = new Dictionary<string, string>()
         {
             ["MOVE"] = "mover",
-            ["CAPTURE"] = "capturar",            ["PLAY AGAINST"] = "jogar contra",
+            ["CAPTURE"] = "capturar",            
+            ["PLAY AGAINST"] = "jogar contra",
             ["END"] = "finalizar a partida",
             ["CAPTURE"] = "capturar",
             ["GO BACK"] = "voltar atrás",
@@ -244,10 +245,8 @@ namespace AppGui
             string action = getFromRecognized(dict, "Action", "");
 
             action = getCurrentOrUpdate(action, "action", "");
-            Console.WriteLine("hi");
 
             bool isConfident = true;
-            Console.WriteLine("bye");
 
             switch (action)
             {
@@ -283,6 +282,13 @@ namespace AppGui
                     string from = getFromRecognized(dict, "PositionInitial");
                     string to = getFromRecognized(dict, "PositionFinal");
                     int pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
+
+                    Console.WriteLine("Entity: " + entity);
+                    Console.WriteLine("Action: " + action);
+                    Console.WriteLine("from: " + from);
+                    Console.WriteLine("to: " + to);
+                    Console.WriteLine("pieceNumber: " + pieceNumber);
+
 
                     var possiblePieces = getPossiblePieces(
                         pieceName: entity,
@@ -355,18 +361,24 @@ namespace AppGui
                     string finalPos = getFromRecognized(dict, "PositionFinal");
                     pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
 
+                    Console.WriteLine("Entity: " + entity);
+                    Console.WriteLine("Action: " + action);
+                    Console.WriteLine("from: " + initialPos);
+                    Console.WriteLine("to: " + finalPos);
+                    Console.WriteLine("pieceNumber: " + pieceNumber);
+
                     possiblePieces = getPossiblePiecesCapture(
                         pieceName: entity,
                         from: initialPos,
                         number: pieceNumber
                     );
 
-                    Console.WriteLine("Possible pieces: " + possiblePieces.Count);
+                    //Console.WriteLine("Possible pieces: " + possiblePieces.Count);
                     
-                    foreach (var piece in possiblePieces)
-                    {
-                        Console.WriteLine(piece.GetAttribute("class"));
-                    }
+                    //foreach (var piece in possiblePieces)
+                    //{
+                    //    Console.WriteLine(piece.GetAttribute("class"));
+                    //}
 
                     finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
                     string target = getFromRecognized(dict, "Target");
@@ -495,12 +507,12 @@ namespace AppGui
             
 
 
-            Console.WriteLine("Possible pieces func: " + pieces.Count);
+            //Console.WriteLine("Possible pieces func: " + pieces.Count);
 
-            foreach (var piece in pieces)
-            {
-                Console.WriteLine(piece.GetAttribute("class"));
-            }
+            //foreach (var piece in pieces)
+            //{
+            //    Console.WriteLine(piece.GetAttribute("class"));
+            //}
 
             if (pieces.Count == 0) {
                 // pieces = every player is a possible piece
@@ -524,11 +536,11 @@ namespace AppGui
                 }
             }
 
-            Console.WriteLine("Correct pieces: " + correctPieces.Count);
-            foreach (var piece in correctPieces)
-            {
-                Console.WriteLine(piece.GetAttribute("class"));
-            }
+            //Console.WriteLine("Correct pieces: " + correctPieces.Count);
+            //foreach (var piece in correctPieces)
+            //{
+            //    Console.WriteLine(piece.GetAttribute("class"));
+            //}
 
             if (correctPieces.Count == 1)
             {
@@ -543,12 +555,13 @@ namespace AppGui
 
                 if (possibleMoves.Count == 1)
                 {
-                    context["from"] = to;
-                    performMove((IWebElement)possibleMoves[0]);
+                    if (to.Length <= 2) context["from"] = to;
+                    performMove(possibleMoves[0]);
 
                 }
                 else
                 {
+                    piece.Click();
                     context["from"] = getPiecePosition(piece);
                     sendMessage(AMBIGUOS_MOVEMENT);
                 }
@@ -839,8 +852,8 @@ namespace AppGui
                 var possibleMoves = possibleMovesList[0];
                 if (possibleMoves.Count == 1)
                 {
-                    context["from"] = to;
-                    performMove((IWebElement)possibleMoves[0]);
+                    if (to.Length <= 2) context["from"] = to;
+                    performMove(possibleMoves[0]);
 
                 }
                 else
@@ -1047,7 +1060,10 @@ namespace AppGui
              * @parameter direction: up, down, left, right, etc
              */
 
+            Console.WriteLine("From suspeito: " + from);
+
             from = getCurrentOrUpdate(from, "from");
+            Console.WriteLine("From suspeito new: " + from);
             pieceName = getCurrentOrUpdate(pieceName ,"pieceName");
 
             // i have no idea what the piece can be
@@ -1082,10 +1098,10 @@ namespace AppGui
             }
 
 
-            foreach (var possiblePiece in possiblePieces)
-            {
-                Console.WriteLine(possiblePiece.GetAttribute("class"));
-            }
+            //foreach (var possiblePiece in possiblePieces)
+            //{
+            //    Console.WriteLine(possiblePiece.GetAttribute("class"));
+            //}
 
             var possiblePiecesOnDirection = sortByDirection(possiblePieces, from);
 
