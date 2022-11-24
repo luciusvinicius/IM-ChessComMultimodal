@@ -91,6 +91,19 @@ namespace AppGui
             "Contra quem quer jogar? Computador ou amigos?"
         };
 
+        static List<string> SOUND_ON = new List<string>() {
+            "Som ativado",
+            "Som do jogo ativado"
+        };
+        static List<string> SOUND_OFF = new List<string>() {
+            "Som desativado",
+            "Som do jogo desativado"
+        };
+        static List<string> LOADED_VS_COMPUTER = new List<string>() {
+            "Jogo carregado. Para iniciar fale 'começar jogo', ou já movimente sua peça",
+        };
+
+
         static List<string> GAME_MUTED_ALREADY = new List<string>() {
             "O jogo já esta sem som."
         };
@@ -126,12 +139,11 @@ namespace AppGui
             "Infelizmente a ação sugerida não pode ser aplicada nesta página. Por favor, tente mudar de página e tente novamente. "
         };
 
+
         static string CONFIRM_CHOICE = "Você deseja";
         static string END_CONFIRM_CHOICE = "Por favor responda com sim ou não.";
 
         // ------------------------ CONFIRMATIONS
-
-
 
         float CONFIDENCE_BOTTOM_LIMIT = 0.1f;
         float CONFIDENCE_BOTTOM_UPPER_LIMIT = 0.59f;
@@ -143,6 +155,8 @@ namespace AppGui
             ["END"] = "finalizar a partida",
             ["CAPTURE"] = "capturar",
             ["GO BACK"] = "voltar atrás",
+            ["SOUND_MANIPULATION_OFF"] = "desativar som",
+            ["SOUND_MANIPULATION_ON"] = "ativar som",
             ["WHITE"] = "branco",
             ["BLACK"] = "preto",
             ["KING"] = "rei",
@@ -285,23 +299,11 @@ namespace AppGui
                     string to = getFromRecognized(dict, "PositionFinal");
                     int pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
 
-                    Console.WriteLine("Entity: " + entity);
-                    Console.WriteLine("Action: " + action);
-                    Console.WriteLine("from: " + from);
-                    Console.WriteLine("to: " + to);
-                    Console.WriteLine("pieceNumber: " + pieceNumber);
-
-
                     var possiblePieces = getPossiblePieces(
                         pieceName: entity,
                         from: from,
                         number: pieceNumber
                     );
-
-                    foreach (var piece in possiblePieces)
-                    {
-                        Console.WriteLine(piece.GetAttribute("class"));
-                    }
 
                     int finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
                     if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
@@ -363,24 +365,11 @@ namespace AppGui
                     string finalPos = getFromRecognized(dict, "PositionFinal");
                     pieceNumber = dict.ContainsKey("NumberInitial") ? int.Parse(dict["NumberInitial"]) : 1;
 
-                    Console.WriteLine("Entity: " + entity);
-                    Console.WriteLine("Action: " + action);
-                    Console.WriteLine("from: " + initialPos);
-                    Console.WriteLine("to: " + finalPos);
-                    Console.WriteLine("pieceNumber: " + pieceNumber);
-
                     possiblePieces = getPossiblePiecesCapture(
                         pieceName: entity,
                         from: initialPos,
                         number: pieceNumber
                     );
-
-                    Console.WriteLine("Possible pieces: " + possiblePieces.Count);
-                    
-                    foreach (var piece in possiblePieces)
-                    {
-                        Console.WriteLine(piece.GetAttribute("class"));
-                    }
 
                     finalNumer = dict.ContainsKey("NumberFinal") ? int.Parse(dict["NumberFinal"]) : 1;
                     string target = getFromRecognized(dict, "Target");
@@ -410,11 +399,23 @@ namespace AppGui
                     break;
 
                 case "SOUND_MANIPULATION_OFF":
-                    soundOff();
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
+                    if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
+                    if (isConfident) soundOff();
                     break;
 
                 case "SOUND_MANIPULATION_ON":
-                    soundOn();
+                    if (driver.Url != COMPUTER_URL && !driver.Url.Contains(VS_FRIENDS_URL))
+                    {
+                        sendMessage(WRONG_PAGE_ERROR);
+                        return;
+                    }
+                    if (!ignoreConfidence) isConfident = generateConfidence(confidence, dict);
+                    if (isConfident) soundOn();
                     break;
 
                 default:
@@ -432,7 +433,6 @@ namespace AppGui
             var mute_input = driver.FindElement(By.Id("playSounds"));
 
             var mute = mute_input.Selected;
-            Console.WriteLine(mute);
 
             if (mute)
             {
@@ -440,18 +440,8 @@ namespace AppGui
                 buttonSound_mute.Click();
                 IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
                 save_mute.Click();
-                Console.WriteLine("aha");
-                Console.WriteLine(mute);
-                System.Threading.Thread.Sleep(WAIT_TIME);
+                sendMessage(SOUND_OFF);
 
-                Actions actionSave = new Actions(driver);
-                Console.WriteLine("~weppaa ir ao botao");
-                save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
-                Console.WriteLine("passei no botao");
-                actionSave.MoveToElement(save_mute).Click().Perform();
-                Console.WriteLine("cliquei");
-                Console.WriteLine(mute);
-                Console.WriteLine("aha");
             }
             else
             {
@@ -469,18 +459,13 @@ namespace AppGui
             var mute_input = driver.FindElement(By.Id("playSounds"));
 
             var mute = mute_input.Selected;
-            Console.WriteLine(mute);
             if (!mute)
             {
                 IWebElement buttonSound_mute = driver.FindElement(By.CssSelector("div.settings-field-row:nth-child(9) > div:nth-child(2) > label:nth-child(2)"));
                 buttonSound_mute.Click();
                 IWebElement save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
                 save_mute.Click();
-                System.Threading.Thread.Sleep(WAIT_TIME);
-
-                Actions actionSave = new Actions(driver);
-                save_mute = driver.FindElement(By.CssSelector(".ui_v5-button-primary"));
-                actionSave.MoveToElement(save_mute).Click().Perform();
+                sendMessage(SOUND_ON);
             }
             else
             {
@@ -808,21 +793,29 @@ namespace AppGui
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(3);
             System.Threading.Thread.Sleep(WAIT_TIME);
-            if (hasAd)
+            try
             {
-                try
+                if (hasAd)
                 {
-                    IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
-                    Console.WriteLine(ad);
-                    ad.Click();
-                }
-                catch (NoSuchElementException e)
-                {
-                    IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD2));
-                    Console.WriteLine(ad);
-                    ad.Click();
+                    try
+                    {
+                        IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD));
+                        Console.WriteLine(ad);
+                        ad.Click();
+                    }
+                    catch (NoSuchElementException e)
+                    {
+                        IWebElement ad = driver.FindElement(By.XPath(CLOSE_AD2));
+                        Console.WriteLine(ad);
+                        ad.Click();
+                    }
                 }
             }
+            catch (NoSuchElementException e)
+            {
+
+            }
+
 
             if (hasBoard)
             {
@@ -835,6 +828,10 @@ namespace AppGui
                 Console.WriteLine("gamer board: " + board.GetAttribute("class"));
                 playerColor = getPlayerColor(board);
                 pieceColor = "piece " + playerColor[0];
+            }
+
+            if (URL == COMPUTER_URL) {
+                sendMessage(LOADED_VS_COMPUTER);
             }
         }
 
