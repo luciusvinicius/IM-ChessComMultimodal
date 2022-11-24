@@ -72,11 +72,11 @@ namespace AppGui
             "Escolha um amigo dentre a lista de amigos"
         };
         static List<string> LOADING = new List<string>() { 
-            "Estamos carregando. Por favor, aguarde.", 
-            "Por favor, espere um pouco enquanto carregamos as configurações." 
+            "Estamos a carregar o jogo. Por favor, aguarde.", 
+            "Por favor, espere um pouco enquanto configuaramos o jogo." 
         };
         static List<string> REPEAT_PHRASE = new List<string>() {
-            "Então poderia repetir a frase novamnte?"
+            "Então poderia repetir a frase novamente?"
         };
         static List<string> GAME_STARTED = new List<string>() {
             "Jogo iniciado! Tenha um bom jogo!"
@@ -121,7 +121,7 @@ namespace AppGui
             "Não é possível realizar o movimento 'roque' no momento." 
         };
         static List<string> WRONG_PAGE_ERROR = new List<string>() {
-            "Você não está na página correta para realizar essa ação. Por favor, tente mudar de página e tente novamente. ",
+            "Não está na página correta para realizar essa ação. Por favor, tente mudar de página e tente novamente. ",
             "Infelizmente a ação sugerida não pode ser aplicada nesta página. Por favor, tente mudar de página e tente novamente. "
         };
 
