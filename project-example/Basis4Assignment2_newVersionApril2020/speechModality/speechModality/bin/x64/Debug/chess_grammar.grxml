@@ -140,6 +140,7 @@
       <item> silência </item>
       <item> Muta </item>
       <item> Mutar </item>
+	  <item> desativar som </item>
     </one-of>
     <tag>out.Action = "SOUND_MANIPULATION_OFF"</tag>
     <item repeat="0-1"> o jogo </item>
@@ -369,6 +370,20 @@
     <tag>out.Action="SPECIAL" </tag> 
     
     
+  </rule>
+
+  <rule id="ControlBot">
+    <item repeat="0-1"> Por favor </item>
+    <one-of>
+			<item>
+				silêncio<tag>out="SILENT"</tag>
+			</item>
+      <item>
+        narrar<tag>out="NARRATE"</tag>
+      </item>
+    </one-of>
+    <item repeat="0-1"> Por favor </item>
+
   </rule>
 
 	<rule id="Piece">
